@@ -59,16 +59,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </span>
       ),
     },
-    {
-      id: 'privacy' as NavTab,
-      label: t('navPrivacy'),
-      icon: Shield,
-      badge: (
-        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">
-          Zero-Cloud
-        </span>
-      ),
-    },
+    // {
+    //   id: 'privacy' as NavTab,
+    //   label: t('navPrivacy'),
+    //   icon: Shield,
+    //   badge: (
+    //     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">
+    //       Zero-Cloud
+    //     </span>
+    //   ),
+    // },
   ];
 
   const handleItemClick = (id: NavTab) => {
@@ -147,23 +147,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* System Status & Quick Controls Footer */}
       <div className="p-4 border-t border-slate-800/80 space-y-3 bg-[#050810]">
-        {/* Air-Gapped Trademark Green Rectangular Badge */}
-        <div className="rounded-xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-[#071310] border border-emerald-500/40 p-2.5 shadow-md">
+        {/* Air-Gapped Trademark Green Rectangular Badge (Click to open Privacy Architecture) */}
+        <div
+          onClick={() => handleItemClick('privacy')}
+          className="rounded-xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-[#071310] border border-emerald-500/40 hover:border-emerald-400 p-2.5 shadow-md cursor-pointer transition group"
+          title={language === 'hi' ? 'क्लिक करके ऑन-डिवाइस प्राइवेसी आर्किटेक्चर देखें' : 'Click to view Zero-Cloud Air-Gapped Architecture'}
+        >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
-              <span className="font-extrabold text-[11px] tracking-wider text-emerald-300 uppercase">
+              <span className="font-extrabold text-[11px] tracking-wider text-emerald-300 uppercase group-hover:text-emerald-200 transition">
                 100% Air-Gapped
               </span>
             </div>
-            <Shield className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+            <Shield className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0 group-hover:scale-110 transition" />
           </div>
-          <p className="text-[10px] text-slate-400 font-medium leading-tight">
-            {language === 'hi' ? 'शून्य क्लाउड लीकेज · ऑन-डिवाइस सुरक्षित' : 'Zero Cloud PHI Leakage · On-Device'}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-slate-400 font-medium leading-tight">
+              {language === 'hi' ? 'शून्य क्लाउड लीकेज · ऑन-डिवाइस' : 'Zero Cloud PHI Leakage · On-Device'}
+            </p>
+            <span className="text-[9px] text-emerald-400/80 group-hover:underline font-mono ml-1">View →</span>
+          </div>
         </div>
 
         {/* Local Model Pill & Trigger */}
