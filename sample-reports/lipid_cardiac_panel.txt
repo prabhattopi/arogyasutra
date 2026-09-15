@@ -1,0 +1,44 @@
+================================================================================
+                    CAREPULSE CARDIOLOGY & DIAGNOSTIC SUITE
+                           Lipid & Cardiovascular Profile
+================================================================================
+PATIENT NAME   : Vikramaditya Roy                 AGE / SEX   : 39 Yrs / Male
+PATIENT ID     : CP-LIP-44120                     REF BY      : Dr. A. Sengupta, MD (Cardio)
+SAMPLE TYPE    : Serum                            COLLECTED   : 05-Sep-2026 07:15 AM
+FASTING STATUS : 14 Hours Fasting Over Night      REPORTED    : 05-Sep-2026 11:00 AM
+================================================================================
+                                LIPID PROFILE
+================================================================================
+INVESTIGATION                    RESULT       UNIT          REFERENCE RANGE     STATUS
+--------------------------------------------------------------------------------
+Total Cholesterol                252          mg/dL         < 200 (Desirable)   HIGH
+                                                            200 - 239 (Borderline)
+                                                            >= 240 (High)
+
+Triglycerides                    218          mg/dL         < 150 (Normal)      HIGH
+                                                            150 - 199 (Borderline)
+                                                            >= 200 (High)
+
+HDL Cholesterol (Good)           36           mg/dL         > 40 (Normal)       LOW
+                                                            > 60 (Optimal)
+
+LDL Cholesterol (Bad)            172          mg/dL         < 100 (Optimal)     HIGH
+                                                            100 - 129 (Near Opt)
+                                                            130 - 159 (Borderline)
+                                                            160 - 189 (High)
+
+VLDL Cholesterol                 43.6         mg/dL         5.0 - 30.0          HIGH
+Non-HDL Cholesterol              216          mg/dL         < 130               HIGH
+Cholesterol / HDL Ratio          7.0          Ratio         3.3 - 4.4           ELEVATED
+--------------------------------------------------------------------------------
+THYROID GLAND MARKER:
+Thyroid Stimulating Hormone(TSH) 3.12         uIU/mL        0.45 - 4.50         NORMAL
+High-Sensitivity CRP (hs-CRP)    3.8          mg/L          < 1.0 (Low risk)    HIGH CARDIO RISK
+                                                            1.0 - 3.0 (Avg risk)
+                                                            > 3.0 (High risk)
+--------------------------------------------------------------------------------
+INTERPRETATION:
+Dyslipidemia characterized by mixed hyperlipidemia (elevated total cholesterol, hypertriglyceridemia, and elevated LDL) coupled with sub-optimal protective HDL levels. Elevated hs-CRP indicates systemic inflammation relevant for cardiovascular assessment.
+================================================================================
+                            *** END OF REPORT ***
+================================================================================

@@ -1,0 +1,39 @@
+================================================================================
+                    METROCARE ADVANCED DIAGNOSTICS LABORATORY
+                 Accredited Diagnostic Pathology & Clinical Center
+================================================================================
+PATIENT NAME   : Rajesh Kumar Verma               AGE / SEX   : 46 Yrs / Male
+PATIENT ID     : MC-2026-90412                    REF BY      : Dr. V. Swaminathan, MD
+SAMPLE TYPE    : Whole Blood (EDTA)               COLLECTED   : 06-Sep-2026 08:30 AM
+REPORT STATUS  : Completed                        REPORTED    : 06-Sep-2026 01:15 PM
+================================================================================
+                                COMPLETE BLOOD COUNT (CBC)
+================================================================================
+INVESTIGATION                    RESULT       UNIT          REFERENCE RANGE     STATUS
+--------------------------------------------------------------------------------
+Hemoglobin (Hb)                  9.4          g/dL          13.0 - 17.0         LOW
+Red Blood Cell Count (RBC)       3.35         mill/cu.mm    4.50 - 5.90         LOW
+Packed Cell Volume (PCV/HCT)     29.8         %             40.0 - 50.0         LOW
+Mean Corpuscular Volume (MCV)    68.2         fL            80.0 - 100.0        LOW
+Mean Corpuscular Hb (MCH)        21.4         pg            27.0 - 32.0         LOW
+MCH Concentration (MCHC)         31.5         g/dL          32.0 - 36.0         BORDERLINE
+Red Cell Distrib Width (RDW)     16.8         %             11.5 - 14.5         HIGH
+
+Total Leukocyte Count (WBC)      13,800       /cu.mm        4,000 - 11,000      HIGH
+Neutrophils                      78           %             40 - 75             HIGH
+Lymphocytes                      16           %             20 - 45             LOW
+Monocytes                        4            %             2 - 8               NORMAL
+Eosinophils                      2            %             1 - 6               NORMAL
+Basophils                        0            %             0 - 1               NORMAL
+
+Platelet Count                   265,000      /cu.mm        150,000 - 450,000   NORMAL
+Mean Platelet Volume (MPV)       8.6          fL            7.4 - 10.4          NORMAL
+--------------------------------------------------------------------------------
+PERIPHERAL SMEAR FINDINGS:
+RBC Morphology: Microcytic, hypochromic with mild anisopoikilocytosis.
+WBC: Polymorphonuclear leukocytosis present. Toxic granules noted in neutrophils.
+Platelets: Adequate on smear, normal morphology.
+Impression: Microcytic hypochromic anemia with neutrophilic leukocytosis.
+================================================================================
+                            *** END OF REPORT ***
+================================================================================

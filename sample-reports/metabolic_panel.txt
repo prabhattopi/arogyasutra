@@ -1,0 +1,41 @@
+================================================================================
+                    APEX PATHOLOGY & ENDOCRINE RESEARCH LAB
+                       Comprehensive Metabolic & Renal Profile
+================================================================================
+PATIENT NAME   : Ananya S. Sharma                 AGE / SEX   : 52 Yrs / Female
+PATIENT ID     : APX-88219                        REF BY      : Dr. P. Mehta, DM (Endo)
+SAMPLE TYPE    : Serum & Fluoride Plasma          COLLECTED   : 07-Sep-2026 07:45 AM
+FASTING STATUS : 12 Hours Fasting Completed       REPORTED    : 07-Sep-2026 12:30 PM
+================================================================================
+                       GLYCEMIC & RENAL METABOLIC PANEL
+================================================================================
+INVESTIGATION                    RESULT       UNIT          REFERENCE RANGE     STATUS
+--------------------------------------------------------------------------------
+Fasting Blood Glucose (FBS)      168          mg/dL         70 - 99             HIGH
+HbA1c (Glycated Hemoglobin)      8.2          %             < 5.7 (Normal)      HIGH
+                                                            5.7 - 6.4 (Pre)
+                                                            >= 6.5 (Diabetes)
+Estimated Avg Glucose (eAG)      189          mg/dL         < 117               HIGH
+
+Blood Urea Nitrogen (BUN)        26.4         mg/dL         7.0 - 20.0          HIGH
+Serum Creatinine                 1.45         mg/dL         0.55 - 1.02         HIGH
+eGFR (CKD-EPI Formula)           54           mL/min/1.73m2 > 90 (Normal)       LOW
+Uric Acid                        6.8          mg/dL         2.6 - 6.0           HIGH
+
+ELECTROLYTES & LIVER ENZYMES:
+Serum Sodium (Na+)               138          mEq/L         136 - 145           NORMAL
+Serum Potassium (K+)             4.6          mEq/L         3.5 - 5.1           NORMAL
+Serum Chloride (Cl-)             102          mEq/L         98 - 107            NORMAL
+
+SGOT / AST                       38           U/L           10 - 35             SLIGHTLY HIGH
+SGPT / ALT                       52           U/L           10 - 45             HIGH
+Alkaline Phosphatase (ALP)       118          U/L           40 - 130            NORMAL
+Total Bilirubin                  0.8          mg/dL         0.2 - 1.2           NORMAL
+Serum Albumin                    4.1          g/dL          3.5 - 5.0           NORMAL
+--------------------------------------------------------------------------------
+CLINICAL NOTES:
+Elevated fasting plasma glucose and Glycated Hemoglobin consistent with uncontrolled diabetes mellitus.
+Mild elevation of serum creatinine with reduced eGFR warrants clinical evaluation for early diabetic nephropathy.
+================================================================================
+                            *** END OF REPORT ***
+================================================================================

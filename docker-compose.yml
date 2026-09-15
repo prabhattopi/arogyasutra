@@ -1,0 +1,74 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: arogyasutra-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - arogyasutra-network
+    labels:
+      - "com.docker.compose.project=arogyasutra"
+
+  mongodb:
+    image: mongo:7.0
+    container_name: arogyasutra-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - arogyasutra-network
+    labels:
+      - "com.docker.compose.project=arogyasutra"
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: arogyasutra-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
+      - MONGODB_URI=mongodb://mongodb:27017/arogyasutra
+      - NODE_ENV=production
+    depends_on:
+      - ollama
+      - mongodb
+    networks:
+      - arogyasutra-network
+    labels:
+      - "com.docker.compose.project=arogyasutra"
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: arogyasutra-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - arogyasutra-network
+    labels:
+      - "com.docker.compose.project=arogyasutra"
+
+networks:
+  arogyasutra-network:
+    name: arogyasutra-network
+    driver: bridge
+
+volumes:
+  ollama_data:
+    name: arogyasutra_ollama_data
+  mongo_data:
+    name: arogyasutra_mongo_data

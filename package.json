@@ -1,0 +1,16 @@
+{
+  "name": "arogyasutra",
+  "version": "1.0.0",
+  "description": "ArogyaSutra: Privacy-First AI Medical Report Companion (Hack2Heal 2.0)",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,cyan\" \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix server && npm run build --prefix client",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "test": "npm run test --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "author": "Prabhat / ArogyaSutra Team",
+  "license": "MIT"
+}
