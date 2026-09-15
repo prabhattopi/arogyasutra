@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, User, Send, RefreshCw, AlertCircle, Sparkles, MessageSquare, ArrowRight } from 'lucide-react';
+import { Bot, User, Send, RefreshCw, AlertCircle, Sparkles, MessageSquare, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { Biomarker } from '../types/report';
 import { streamChatWithReport } from '../services/api';
@@ -34,6 +34,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingAnswer, setStreamingAnswer] = useState('');
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef<boolean>(true);
@@ -362,37 +363,66 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
         )}
       </div>
 
-      {/* Grounded Suggestions Stack (Vertical) */}
+      {/* Grounded Suggestions Stack with Hide/Open Toggle */}
       {hasAnalyzedReport && currentSuggestions.length > 0 && !isStreaming && (
-        <div className="px-5 py-3.5 bg-[#090f1d]/95 border-t border-slate-800 space-y-2">
-          <div className="flex items-center justify-between text-xs text-teal-400 font-semibold">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+        <div className="px-5 py-2.5 bg-[#090f1d]/95 border-t border-slate-800 transition-all">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setIsSuggestionsOpen(!isSuggestionsOpen)}
+              className="flex items-center gap-2 text-xs font-semibold text-teal-400 hover:text-teal-300 transition cursor-pointer group"
+              title={isSuggestionsOpen ? 'Hide suggestions' : 'Open suggestions'}
+            >
+              <Sparkles className="h-3.5 w-3.5 text-teal-400 group-hover:rotate-12 transition" />
               <span>
                 {language === 'hi'
-                  ? 'सुझाए गए प्रश्न (क्लिक करके तुरंत पूछें):'
-                  : 'Suggested Questions (Click to Ask):'}
+                  ? 'सुझाए गए प्रश्न'
+                  : 'Suggested Questions'}
               </span>
-            </span>
-            <span className="text-[10px] text-slate-400 font-normal">Air-Gapped Copilot</span>
+              <span className="text-[10px] font-normal px-1.5 py-0.2 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/25">
+                {currentSuggestions.length}
+              </span>
+            </button>
+
+            {/* Small icon button to hide / open suggestions */}
+            <button
+              type="button"
+              onClick={() => setIsSuggestionsOpen(!isSuggestionsOpen)}
+              className="p-1 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-teal-300 transition cursor-pointer flex items-center gap-1 text-[11px]"
+              title={isSuggestionsOpen ? 'Hide Suggestions' : 'Open Suggestions'}
+            >
+              <span className="hidden sm:inline text-[10px]">
+                {isSuggestionsOpen
+                  ? (language === 'hi' ? 'छुपाएं' : 'Hide')
+                  : (language === 'hi' ? 'खोलें' : 'Open')}
+              </span>
+              {isSuggestionsOpen ? (
+                <ChevronDown className="h-3.5 w-3.5 text-teal-400" />
+              ) : (
+                <ChevronUp className="h-3.5 w-3.5 text-teal-400" />
+              )}
+            </button>
           </div>
 
-          <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
-            {currentSuggestions.map((s, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => handleSend(s)}
-                className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 text-slate-200 hover:text-teal-200 transition flex items-center justify-between group cursor-pointer shadow-sm"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-400 flex-shrink-0" />
-                  <span className="leading-snug">{s}</span>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-teal-400 group-hover:translate-x-0.5 transition flex-shrink-0 ml-2" />
-              </button>
-            ))}
-          </div>
+          {/* Collapsible Suggestions Body */}
+          {isSuggestionsOpen && (
+            <div className="flex flex-col gap-1.5 mt-2.5 max-h-48 overflow-y-auto pr-1 animate-in fade-in duration-150">
+              {currentSuggestions.map((s, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleSend(s)}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 text-slate-200 hover:text-teal-200 transition flex items-center justify-between group cursor-pointer shadow-sm"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-400 flex-shrink-0" />
+                    <span className="leading-snug">{s}</span>
+                  </div>
+                  <ArrowRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-teal-400 group-hover:translate-x-0.5 transition flex-shrink-0 ml-2" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, FileText, CheckCircle2, Sparkles, RefreshCw } from 'lucide-react';
+import { UploadCloud, FileText, Sparkles, RefreshCw } from 'lucide-react';
 import { LanguageCode } from '../i18n/translations';
 import { getTranslation } from '../i18n/useI18n';
 
@@ -57,10 +57,9 @@ hs-CRP (Inflammation)            3.8          mg/L          0.1 - 1.0           
 ];
 
 export const ReportUploader: React.FC<ReportUploaderProps> = ({ onAnalyze, isLoading, language }) => {
-  const [activeTab, setActiveTab] = useState<'sample' | 'upload' | 'paste'>('sample');
+  const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
   const [pastedText, setPastedText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('cbc');
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,40 +83,27 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onAnalyze, isLoa
     e.preventDefault();
     if (isLoading) return;
 
-    if (activeTab === 'sample') {
-      const preset = SAMPLE_PRESETS.find((p) => p.id === selectedPresetId);
-      if (preset) {
-        onAnalyze({ text: preset.text });
-      }
-    } else if (activeTab === 'upload') {
+    if (activeTab === 'upload') {
       if (selectedFile) {
         onAnalyze({ file: selectedFile });
+      } else {
+        // Fallback to sample if user clicks without choosing a file
+        onAnalyze({ text: SAMPLE_PRESETS[0].text });
       }
     } else if (activeTab === 'paste') {
       if (pastedText.trim()) {
         onAnalyze({ text: pastedText });
+      } else {
+        onAnalyze({ text: SAMPLE_PRESETS[0].text });
       }
     }
   };
 
   return (
-    <div className="glass-panel rounded-2xl p-5 sm:p-6 mb-8 shadow-xl">
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4 mb-5">
+    <div className="glass-panel rounded-2xl p-4 sm:p-5 mb-6 shadow-xl">
+      {/* Navigation Tabs Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3 mb-4">
         <div className="flex items-center gap-1.5 bg-slate-950/70 p-1 rounded-xl border border-slate-800/80">
-          <button
-            type="button"
-            onClick={() => setActiveTab('sample')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-              activeTab === 'sample'
-                ? 'bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-950 font-bold shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{t('tabSamples')}</span>
-          </button>
-
           <button
             type="button"
             onClick={() => setActiveTab('upload')}
@@ -145,51 +131,20 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onAnalyze, isLoa
           </button>
         </div>
 
-        <span className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-          {t('uploadTagline')}
-        </span>
+        {/* Quick Demo Case Trigger */}
+        <button
+          type="button"
+          onClick={() => onAnalyze({ text: SAMPLE_PRESETS[0].text })}
+          className="text-xs text-teal-400 hover:text-teal-300 transition flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-500/10 border border-teal-500/20 cursor-pointer"
+          title="Instantly run demo CBC sample without file upload"
+        >
+          <Sparkles className="h-3 w-3 text-teal-400" />
+          <span>{language === 'hi' ? 'डेमो रिपोर्ट लोड करें' : 'Quick Demo Report'}</span>
+        </button>
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* Tab 1: 1-Click Test Samples */}
-        {activeTab === 'sample' && (
-          <div className="space-y-4">
-            <p className="text-xs text-slate-400">
-              {t('sampleSubtitle')}
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {SAMPLE_PRESETS.map((preset) => (
-                <div
-                  key={preset.id}
-                  onClick={() => setSelectedPresetId(preset.id)}
-                  className={`cursor-pointer rounded-xl border p-4 transition-all duration-200 text-left relative ${
-                    selectedPresetId === preset.id
-                      ? 'ring-2 ring-teal-400/90 border-teal-400/60 bg-teal-500/10 shadow-lg shadow-teal-500/10'
-                      : 'border-slate-800/80 bg-slate-950/50 hover:bg-slate-900/60 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-800/90 text-teal-300 border border-teal-500/20">
-                      {preset.tag[language === 'hi' ? 'hi' : 'en']}
-                    </span>
-                    <span className="text-[11px] font-semibold text-slate-300">
-                      {preset.badge[language === 'hi' ? 'hi' : 'en']}
-                    </span>
-                  </div>
-                  <h4 className="font-semibold text-white text-sm mb-1">
-                    {preset.name[language === 'hi' ? 'hi' : 'en']}
-                  </h4>
-                  <p className="text-[11px] text-slate-400 font-mono line-clamp-2">
-                    {preset.text.split('\n')[2] || preset.text.slice(0, 70)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Upload PDF/TXT */}
+        {/* Tab 1: Upload PDF/TXT */}
         {activeTab === 'upload' && (
           <div
             onDragOver={(e) => {
@@ -199,7 +154,7 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onAnalyze, isLoa
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
+            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition ${
               dragOver
                 ? 'border-teal-400 bg-teal-500/10'
                 : 'border-slate-800 hover:border-teal-500/50 bg-slate-950/50'
@@ -212,11 +167,11 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onAnalyze, isLoa
               onChange={handleFileChange}
               className="hidden"
             />
-            <UploadCloud className="h-8 w-8 text-teal-400 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-white mb-1">
+            <UploadCloud className="h-6 w-6 text-teal-400 mx-auto mb-2" />
+            <p className="text-xs sm:text-sm font-semibold text-white mb-0.5">
               {selectedFile ? selectedFile.name : t('uploadDropTitle')}
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] text-slate-400">
               {selectedFile
                 ? `${(selectedFile.size / 1024).toFixed(1)} KB · Ready to parse`
                 : t('uploadDropSubtitle')}
@@ -224,15 +179,15 @@ export const ReportUploader: React.FC<ReportUploaderProps> = ({ onAnalyze, isLoa
           </div>
         )}
 
-        {/* Tab 3: Paste Raw Text */}
+        {/* Tab 2: Paste Raw Text */}
         {activeTab === 'paste' && (
           <div>
             <textarea
-              rows={6}
+              rows={4}
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
               placeholder={t('pastePlaceholder')}
-              className="w-full rounded-xl bg-slate-950/70 border border-slate-800 p-3.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500/60 font-mono leading-relaxed"
+              className="w-full rounded-xl bg-slate-950/70 border border-slate-800 p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500/60 font-mono leading-relaxed"
             />
           </div>
         )}
