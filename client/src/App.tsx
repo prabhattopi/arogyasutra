@@ -11,8 +11,15 @@ import { DoctorQuestions } from './components/DoctorQuestions';
 import { TrendsChart } from './components/TrendsChart';
 import { PrivacyBadge } from './components/PrivacyBadge';
 import { ModelStatusModal } from './components/ModelStatusModal';
-import { FloatingChat } from './components/FloatingChat';
-import { LayoutGrid, MessageSquare, Sparkles } from 'lucide-react';
+import {
+  LayoutGrid,
+  MessageSquare,
+  Sparkles,
+  Activity,
+  Stethoscope,
+  TrendingUp,
+  FileText,
+} from 'lucide-react';
 import { getTranslation } from './i18n/useI18n';
 
 import {
@@ -158,7 +165,8 @@ export const App: React.FC = () => {
   // Navigation and Layout State
   const [activeTab, setActiveTab] = useState<NavTab>('overview');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [demystifyViewMode, setDemystifyViewMode] = useState<'split' | 'chat'>('split');
+  type DemystifyTab = 'chat' | 'biomarkers' | 'doctor' | 'trends' | 'split';
+  const [demystifyTab, setDemystifyTab] = useState<DemystifyTab>('chat');
 
   // Active Report State
   const [biomarkers, setBiomarkers] = useState<Biomarker[]>(INITIAL_BIOMARKERS);
@@ -175,7 +183,7 @@ export const App: React.FC = () => {
   const [trends, setTrends] = useState<TrendPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Report Analysis & Floating Chat State
+  // Report Analysis State
   const [hasAnalyzedReport, setHasAnalyzedReport] = useState(false);
   const [reportId, setReportId] = useState<string>('initial');
 
@@ -206,6 +214,7 @@ export const App: React.FC = () => {
     setIsLoading(true);
     setSummary('');
     setActiveTab('demystify');
+    setDemystifyTab('split'); // live streaming visible directly
 
     // Update reportId and enable chat for this fresh report
     const newReportId = 'rep-' + Date.now();
@@ -248,9 +257,6 @@ export const App: React.FC = () => {
         language={language}
         onLanguageChange={handleLanguageChange}
         onOpenModelModal={() => setIsModelModalOpen(true)}
-        biomarkerCount={biomarkers.length}
-        abnormalCount={abnormalCount}
-        questionCount={doctorQuestions.length}
       />
 
       {/* Main Workspace Column */}
@@ -274,7 +280,7 @@ export const App: React.FC = () => {
             />
           )}
 
-          {/* TAB 2: DEMYSTIFY & CHAT WORKSPACE */}
+          {/* TAB 2: UNIFIED DEMYSTIFY WORKSPACE (ALL REPORT-RELATED FEEDS AS TABS) */}
           {activeTab === 'demystify' && (
             <div className="space-y-6">
               {/* Ingestion & Sample Loader */}
@@ -284,48 +290,155 @@ export const App: React.FC = () => {
                 language={language}
               />
 
-              {/* View Mode Toggle: Split Analysis vs Centered Copilot */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-2xl bg-slate-900/70 border border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 font-medium">
-                    {language === 'hi' ? 'व्यू मोड चुनें:' : 'Display Workspace:'}
-                  </span>
-                  <span className="text-[11px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">
-                    {patientMetadata.reportType || 'Clinical Panel'}
-                  </span>
+              {/* Active Report Header & Context Banner */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-teal-950/40 via-slate-900/70 to-slate-900/50 border border-teal-500/30 shadow-lg flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="h-11 w-11 rounded-2xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-sm flex-shrink-0">
+                    <FileText className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-extrabold text-white">
+                        {patientMetadata.reportType || 'Clinical Diagnostic Report'}
+                      </h3>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/15 text-teal-300 border border-teal-500/30">
+                        {hasAnalyzedReport ? 'Demystified' : 'Loaded Panel'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 flex flex-wrap items-center gap-2 mt-1">
+                      <span>
+                        Subject: <strong className="text-slate-100">{patientMetadata.patientName}</strong> ({patientMetadata.patientAge}, {patientMetadata.patientSex})
+                      </span>
+                      <span>•</span>
+                      <span className="text-teal-400 font-medium">{biomarkers.length} Markers Extracted</span>
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setDemystifyViewMode('split')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-medium ${
-                      demystifyViewMode === 'split'
-                        ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30 font-semibold'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <LayoutGrid className="h-3.5 w-3.5" />
-                    <span>{t('viewSplitBiomarkers')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setDemystifyViewMode('chat')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition cursor-pointer font-medium ${
-                      demystifyViewMode === 'chat'
-                        ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30 font-semibold'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    <span>{t('viewCenterChat')}</span>
-                  </button>
+                <div className="flex items-center gap-2.5">
+                  {abnormalCount > 0 ? (
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-2 shadow-sm">
+                      <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                      <span>{abnormalCount} Alerts Outside Range</span>
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                      All Markers Optimal
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* Mode 1: Split-Pane Clinical Dashboard */}
-              {demystifyViewMode === 'split' && (
+              {/* Integrated Report Navigation Tabs */}
+              <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#090e1a] border border-slate-800 overflow-x-auto scrollbar-none">
+                {/* Tab 1: Centered Copilot Chat */}
+                <button
+                  type="button"
+                  onClick={() => setDemystifyTab('chat')}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer whitespace-nowrap ${
+                    demystifyTab === 'chat'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <MessageSquare className="h-4 w-4 text-teal-400" />
+                  <span>AI Copilot Chat</span>
+                </button>
+
+                {/* Tab 2: Biomarkers Table & Visual Gauges */}
+                <button
+                  type="button"
+                  onClick={() => setDemystifyTab('biomarkers')}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer whitespace-nowrap ${
+                    demystifyTab === 'biomarkers'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Activity className="h-4 w-4 text-teal-400" />
+                  <span>Biomarkers & Vitals ({biomarkers.length})</span>
+                </button>
+
+                {/* Tab 3: Doctor Consultation Checklist */}
+                <button
+                  type="button"
+                  onClick={() => setDemystifyTab('doctor')}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer whitespace-nowrap ${
+                    demystifyTab === 'doctor'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Stethoscope className="h-4 w-4 text-teal-400" />
+                  <span>Doctor Checklist ({doctorQuestions.length})</span>
+                </button>
+
+                {/* Tab 4: Health Trends */}
+                <button
+                  type="button"
+                  onClick={() => setDemystifyTab('trends')}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer whitespace-nowrap ${
+                    demystifyTab === 'trends'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <TrendingUp className="h-4 w-4 text-teal-400" />
+                  <span>Health Trends</span>
+                </button>
+
+                {/* Tab 5: Split View (Biomarkers + Summary) */}
+                <button
+                  type="button"
+                  onClick={() => setDemystifyTab('split')}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer whitespace-nowrap ${
+                    demystifyTab === 'split'
+                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <LayoutGrid className="h-4 w-4 text-teal-400" />
+                  <span>Split View</span>
+                </button>
+              </div>
+
+              {/* TAB CONTENT 1: Centered Spacious AI Copilot Chat */}
+              {demystifyTab === 'chat' && (
+                <div className="animate-in fade-in duration-200">
+                  <CenteredChat
+                    biomarkers={biomarkers}
+                    patientName={patientMetadata.patientName}
+                    reportType={patientMetadata.reportType}
+                    language={language}
+                    hasAnalyzedReport={hasAnalyzedReport}
+                    reportId={reportId}
+                  />
+                </div>
+              )}
+
+              {/* TAB CONTENT 2: Biomarkers Table & Gauges */}
+              {demystifyTab === 'biomarkers' && (
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  <BiomarkerTable biomarkers={biomarkers} language={language} />
+                </div>
+              )}
+
+              {/* TAB CONTENT 3: Doctor Consultation Prep */}
+              {demystifyTab === 'doctor' && (
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  <DoctorQuestions questions={doctorQuestions} language={language} />
+                </div>
+              )}
+
+              {/* TAB CONTENT 4: Longitudinal Health Trends */}
+              {demystifyTab === 'trends' && (
+                <div className="space-y-6 animate-in fade-in duration-200">
+                  <TrendsChart trends={trends} language={language} />
+                </div>
+              )}
+
+              {/* TAB CONTENT 5: Split Overview (Gauges + Realtime Streaming Explanation) */}
+              {demystifyTab === 'split' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-200">
                   <div className="lg:col-span-7 space-y-6">
                     <BiomarkerTable biomarkers={biomarkers} language={language} />
@@ -341,61 +454,10 @@ export const App: React.FC = () => {
                   </div>
                 </div>
               )}
-
-              {/* Mode 2: Center-Stage Wide AI Copilot Chat */}
-              {demystifyViewMode === 'chat' && (
-                <div className="animate-in fade-in duration-200">
-                  <CenteredChat
-                    biomarkers={biomarkers}
-                    patientName={patientMetadata.patientName}
-                    reportType={patientMetadata.reportType}
-                    language={language}
-                    hasAnalyzedReport={hasAnalyzedReport}
-                    reportId={reportId}
-                  />
-                </div>
-              )}
             </div>
           )}
 
-          {/* TAB 3: DEDICATED BIOMARKERS TABLE & GAUGES */}
-          {activeTab === 'biomarkers' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div>
-                  <span className="text-slate-400">Subject: </span>
-                  <strong className="text-white">{patientMetadata.patientName}</strong>
-                  <span className="mx-2 text-slate-600">|</span>
-                  <span className="text-slate-400">Panel: </span>
-                  <strong className="text-teal-300">{patientMetadata.reportType}</strong>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('doctor')}
-                  className="px-3 py-1.5 rounded-xl bg-slate-900 border border-teal-500/30 text-teal-300 hover:text-white transition cursor-pointer"
-                >
-                  {t('navDoctor')} →
-                </button>
-              </div>
-              <BiomarkerTable biomarkers={biomarkers} language={language} />
-            </div>
-          )}
-
-          {/* TAB 4: DOCTOR CONSULTATION PREP */}
-          {activeTab === 'doctor' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <DoctorQuestions questions={doctorQuestions} language={language} />
-            </div>
-          )}
-
-          {/* TAB 5: LONGITUDINAL HEALTH TRENDS */}
-          {activeTab === 'trends' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <TrendsChart trends={trends} language={language} />
-            </div>
-          )}
-
-          {/* TAB 6: AIR-GAPPED PRIVACY ARCHITECTURE */}
+          {/* TAB 3: AIR-GAPPED PRIVACY ARCHITECTURE */}
           {activeTab === 'privacy' && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <PrivacyBadge language={language} />
@@ -429,16 +491,6 @@ export const App: React.FC = () => {
           </div>
         </footer>
       </div>
-
-      {/* Floating AI Companion Drawer Widget */}
-      <FloatingChat
-        biomarkers={biomarkers}
-        patientName={patientMetadata.patientName}
-        reportType={patientMetadata.reportType}
-        language={language}
-        hasAnalyzedReport={hasAnalyzedReport}
-        reportId={reportId}
-      />
 
       {/* Mobile Experience Recommendation Modal */}
       <MobileTipModal language={language} />

@@ -16,7 +16,7 @@ import { SystemHealth } from '../types/report';
 import { LanguageCode } from '../i18n/translations';
 import { getTranslation } from '../i18n/useI18n';
 
-export type NavTab = 'overview' | 'demystify' | 'biomarkers' | 'doctor' | 'trends' | 'privacy';
+export type NavTab = 'overview' | 'demystify' | 'privacy';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -27,9 +27,6 @@ interface SidebarProps {
   language: LanguageCode;
   onLanguageChange: (lang: LanguageCode) => void;
   onOpenModelModal: () => void;
-  biomarkerCount?: number;
-  abnormalCount?: number;
-  questionCount?: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -41,9 +38,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   language,
   onLanguageChange,
   onOpenModelModal,
-  biomarkerCount = 5,
-  abnormalCount = 3,
-  questionCount = 3,
 }) => {
   const t = (key: any) => getTranslation(language, key);
 
@@ -66,42 +60,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ),
     },
     {
-      id: 'biomarkers' as NavTab,
-      label: t('navBiomarkers'),
-      icon: Activity,
-      badge: abnormalCount > 0 ? (
-        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-          {abnormalCount} alert
-        </span>
-      ) : (
-        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400">
-          {biomarkerCount}
-        </span>
-      ),
-    },
-    {
-      id: 'doctor' as NavTab,
-      label: t('navDoctor'),
-      icon: Stethoscope,
-      badge: (
-        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-teal-500/15 text-teal-300 border border-teal-500/30">
-          {questionCount}
-        </span>
-      ),
-    },
-    {
-      id: 'trends' as NavTab,
-      label: t('navTrends'),
-      icon: TrendingUp,
-      badge: null,
-    },
-    {
       id: 'privacy' as NavTab,
       label: t('navPrivacy'),
       icon: Shield,
       badge: (
-        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-          Air-Gapped
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">
+          Zero-Cloud
         </span>
       ),
     },

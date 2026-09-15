@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, User, Send, RefreshCw, AlertCircle, Sparkles, MessageSquare } from 'lucide-react';
+import { Bot, User, Send, RefreshCw, AlertCircle, Sparkles, MessageSquare, ArrowRight } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { Biomarker } from '../types/report';
 import { streamChatWithReport } from '../services/api';
@@ -362,23 +362,37 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
         )}
       </div>
 
-      {/* Grounded Suggestions Row */}
+      {/* Grounded Suggestions Stack (Vertical) */}
       {hasAnalyzedReport && currentSuggestions.length > 0 && !isStreaming && (
-        <div className="px-5 py-3 bg-[#090f1d] border-t border-slate-800 flex items-center gap-2 overflow-x-auto">
-          <span className="text-xs text-teal-400 flex-shrink-0 font-semibold flex items-center gap-1">
-            <Sparkles className="h-3 w-3" />
-            <span>{language === 'hi' ? 'सुझाव:' : 'Suggest:'}</span>
-          </span>
-          {currentSuggestions.map((s, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => handleSend(s)}
-              className="px-3 py-1.5 rounded-xl text-xs whitespace-nowrap bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-teal-500/60 text-slate-300 hover:text-teal-300 transition cursor-pointer"
-            >
-              {s}
-            </button>
-          ))}
+        <div className="px-5 py-3.5 bg-[#090f1d]/95 border-t border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs text-teal-400 font-semibold">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+              <span>
+                {language === 'hi'
+                  ? 'सुझाए गए प्रश्न (क्लिक करके तुरंत पूछें):'
+                  : 'Suggested Questions (Click to Ask):'}
+              </span>
+            </span>
+            <span className="text-[10px] text-slate-400 font-normal">Air-Gapped Copilot</span>
+          </div>
+
+          <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
+            {currentSuggestions.map((s, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => handleSend(s)}
+                className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 text-slate-200 hover:text-teal-200 transition flex items-center justify-between group cursor-pointer shadow-sm"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-400 flex-shrink-0" />
+                  <span className="leading-snug">{s}</span>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-teal-400 group-hover:translate-x-0.5 transition flex-shrink-0 ml-2" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
