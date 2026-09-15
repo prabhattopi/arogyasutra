@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Sidebar, NavTab } from './components/Sidebar';
 import { LandingOverview } from './components/LandingOverview';
-import { CenteredChat } from './components/CenteredChat';
+import { CenteredChat, ChatMessage } from './components/CenteredChat';
 import { MobileTipModal } from './components/MobileTipModal';
-import { ReportUploader } from './components/ReportUploader';
+import { ReportUploader, SAMPLE_PRESETS } from './components/ReportUploader';
 import { BiomarkerTable } from './components/BiomarkerTable';
 import { AnalysisStream } from './components/AnalysisStream';
 import { DoctorQuestions } from './components/DoctorQuestions';
@@ -19,6 +19,9 @@ import {
   Stethoscope,
   TrendingUp,
   FileText,
+  UploadCloud,
+  ArrowRight,
+  CheckCircle2,
 } from 'lucide-react';
 import { getTranslation } from './i18n/useI18n';
 
@@ -93,10 +96,65 @@ const INITIAL_BIOMARKERS: Biomarker[] = [
     status: 'NORMAL',
     plainExplanation: 'Tiny blood disc fragments that form clots to prevent and stop bleeding when vessels are injured.',
   },
+  {
+    name: 'Mean Corpuscular Hb (MCH)',
+    category: 'Hematology',
+    value: 21.4,
+    unit: 'pg',
+    referenceMin: 27.0,
+    referenceMax: 32.0,
+    referenceText: '27.0 - 32.0 pg',
+    status: 'LOW',
+    plainExplanation: 'Average amount of oxygen-carrying hemoglobin inside each red blood cell.',
+  },
+  {
+    name: 'MCH Concentration (MCHC)',
+    category: 'Hematology',
+    value: 31.5,
+    unit: 'g/dL',
+    referenceMin: 32.0,
+    referenceMax: 36.0,
+    referenceText: '32.0 - 36.0 g/dL',
+    status: 'LOW',
+    plainExplanation: 'Average concentration of hemoglobin in a given volume of packed red blood cells.',
+  },
+  {
+    name: 'Red Cell Distribution Width (RDW)',
+    category: 'Hematology',
+    value: 16.8,
+    unit: '%',
+    referenceMin: 11.5,
+    referenceMax: 14.5,
+    referenceText: '11.5 - 14.5 %',
+    status: 'HIGH',
+    plainExplanation: 'Variation in red blood cell volume and size; higher values suggest mixed cell populations like in iron deficiency.',
+  },
+  {
+    name: 'Neutrophils',
+    category: 'Hematology',
+    value: 78,
+    unit: '%',
+    referenceMin: 40,
+    referenceMax: 75,
+    referenceText: '40 - 75 %',
+    status: 'HIGH',
+    plainExplanation: 'First responder white blood cells that fight active acute bacterial infections.',
+  },
+  {
+    name: 'Lymphocytes',
+    category: 'Hematology',
+    value: 16,
+    unit: '%',
+    referenceMin: 20,
+    referenceMax: 45,
+    referenceText: '20 - 45 %',
+    status: 'LOW',
+    plainExplanation: 'White blood cells responsible for viral immunity and targeted antibody production.',
+  },
 ];
 
 const INITIAL_SUMMARY_EN = `### 1. Overview & Gentle Reassurance
-This Complete Blood Count provides an essential evaluation of your circulating blood cells and immune defense. Out of 5 parameters analyzed, your Platelet count is completely normal, ensuring healthy clotting. Two key markers show variance: lower red cell counts and elevated white cell numbers.
+This Complete Blood Count provides an essential evaluation of your circulating blood cells and immune defense. Out of 10 parameters analyzed, your Platelet count and cellular volumes are functioning reliably. Several markers show variance: lower red cell counts and elevated white cell numbers.
 
 ### 2. Key Findings Explained in Everyday Language
 - **Hemoglobin (9.4 g/dL) [LOW]:** Hemoglobin acts like an oxygen delivery vehicle. When it dips below typical ranges, less oxygen reaches muscles and tissues, which commonly explains why individuals might feel tired or easily fatigued during routine activities.
@@ -109,7 +167,7 @@ This Complete Blood Count provides an essential evaluation of your circulating b
 - **Follow-Up Timeline:** Inquire about re-checking your WBC count in a few weeks once any underlying infection has resolved.`;
 
 const INITIAL_SUMMARY_HI = `### 1. रिपोर्ट का सारांश एवं आश्वस्ति (Overview & Reassurance)
-आपकी यह कम्पलीट ब्लड काउंट जांच आपके शरीर की रक्त कोशिकाओं और प्रतिरक्षा तंत्र की स्थिति को दर्शाती है। कुल 5 मुख्य बायोमार्कर्स में से आपकी प्लेटलेट संख्या पूरी तरह से सामान्य है, जो कि स्वस्थ रक्त के थक्के जमने की क्षमता को सुनिश्चित करती है। दो मुख्य बिंदुओं पर ध्यान देने की आवश्यकता है: हीमोग्लोबिन की कमी और श्वेत रक्त कोशिकाओं (WBC) में वृद्धि।
+आपकी यह कम्पलीट ब्लड काउंट जांच आपके शरीर की रक्त कोशिकाओं और प्रतिरक्षा तंत्र की स्थिति को दर्शाती है। कुल 10 मुख्य बायोमार्कर्स में से आपकी प्लेटलेट संख्या पूरी तरह से सामान्य है, जो कि स्वस्थ रक्त के थक्के जमने की क्षमता को सुनिश्चित करती है। दो मुख्य बिंदुओं पर ध्यान देने की आवश्यकता है: हीमोग्लोबिन की कमी और श्वेत रक्त कोशिकाओं (WBC) में वृद्धि।
 
 ### 2. महत्वपूर्ण निष्कर्ष सरल बोलचाल में (Key Findings)
 - **हीमोग्लोबिन (9.4 g/dL) [कम]:** हीमोग्लोबिन शरीर में ऑक्सीजन पहुंचाने वाली गाड़ी की तरह है। इसका मान कम होने पर मांसपेशियों और अंगों तक कम ऑक्सीजन पहुँचती है, जिससे थकान या कमजोरी महसूस होना स्वाभाविक है।
@@ -168,6 +226,9 @@ export const App: React.FC = () => {
   type DemystifyTab = 'chat' | 'biomarkers' | 'doctor' | 'trends' | 'split';
   const [demystifyTab, setDemystifyTab] = useState<DemystifyTab>('chat');
 
+  // Slide-Over Drawer State
+  const [isUploadDrawerOpen, setIsUploadDrawerOpen] = useState(false);
+
   // Active Report State
   const [biomarkers, setBiomarkers] = useState<Biomarker[]>(INITIAL_BIOMARKERS);
   const [summary, setSummary] = useState<string>(INITIAL_SUMMARY_EN);
@@ -184,13 +245,32 @@ export const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Report Analysis State
-  const [hasAnalyzedReport, setHasAnalyzedReport] = useState(false);
+  const [hasAnalyzedReport, setHasAnalyzedReport] = useState(true);
   const [reportId, setReportId] = useState<string>('initial');
+
+  // Lifted Chat Session State (Persisted across tab changes & language switches)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 'welcome-init',
+      sender: 'assistant',
+      text:
+        language === 'hi'
+          ? `नमस्ते! मैंने आपकी **Complete Blood Count (CBC)** का विश्लेषण पूरा कर लिया है। आप रिपोर्ट के किसी भी बायोमार्कर, आहार, या डॉक्टर परामर्श के बारे में हिंदी, English या Hinglish में सवाल पूछ सकते हैं।`
+          : `Hello! I have reviewed your **Complete Blood Count (CBC)** for Rajesh Kumar Verma. Feel free to ask any questions regarding your biomarkers, dietary recommendations, warning signs, or doctor consultation in English, Hindi, or Hinglish.`,
+      timestamp: 'Just now',
+    },
+  ]);
+  const [chatSuggestions, setChatSuggestions] = useState<string[]>([
+    'What natural foods help restore healthy hemoglobin levels?',
+    'Does this elevated white blood cell count indicate active infection?',
+    'What key questions should I prioritize with my doctor?',
+    'When should I schedule a follow-up CBC test?',
+  ]);
 
   const t = (key: any) => getTranslation(language, key);
   const abnormalCount = biomarkers.filter((b) => b.status !== 'NORMAL').length;
 
-  // Switch initial texts when language changes if on initial report
+  // Switch initial texts when language changes if on initial report without wiping active chat
   const handleLanguageChange = (newLang: LanguageCode) => {
     setLanguage(newLang);
     if (summary === INITIAL_SUMMARY_EN || summary === INITIAL_SUMMARY_HI) {
@@ -214,12 +294,31 @@ export const App: React.FC = () => {
     setIsLoading(true);
     setSummary('');
     setActiveTab('demystify');
-    setDemystifyTab('split'); // live streaming visible directly
+    setDemystifyTab('split'); // live streaming visible directly in split view
+    setIsUploadDrawerOpen(false); // close the slide-over drawer
 
-    // Update reportId and enable chat for this fresh report
+    // Update reportId and reset chat for this fresh report upload
     const newReportId = 'rep-' + Date.now();
     setReportId(newReportId);
     setHasAnalyzedReport(true);
+
+    const reportLabel = payload.file
+      ? payload.file.name
+      : 'Diagnostic Report';
+
+    // Fresh chat session for newly uploaded report
+    setChatMessages([
+      {
+        id: 'welcome-' + Date.now(),
+        sender: 'assistant',
+        text:
+          language === 'hi'
+            ? `नमस्ते! मैंने आपकी नई रिपोर्ट **${reportLabel}** का विश्लेषण पूरा कर लिया है। आप रिपोर्ट के किसी भी बायोमार्कर, आहार, या डॉक्टर परामर्श के बारे में हिंदी, English या Hinglish में सवाल पूछ सकते हैं।`
+            : `Hello! I have loaded and analyzed your **${reportLabel}**. Feel free to ask any questions regarding your biomarkers, diet, or physician recommendations.`,
+        timestamp: 'Just now',
+      },
+    ]);
+    setChatSuggestions([]);
 
     await streamAnalyzeReport(
       { ...payload, language },
@@ -280,11 +379,13 @@ export const App: React.FC = () => {
             />
           )}
 
-          {/* TAB 2: UNIFIED DEMYSTIFY WORKSPACE (ALL REPORT-RELATED FEEDS AS TABS) */}
+          {/* TAB 2: UNIFIED DEMYSTIFY WORKSPACE */}
           {activeTab === 'demystify' && (
             <div className="space-y-6">
-              {/* Ingestion & Sample Loader */}
+              {/* Slide-Over Side Drawer for Report Ingestion */}
               <ReportUploader
+                isOpen={isUploadDrawerOpen}
+                onClose={() => setIsUploadDrawerOpen(false)}
                 onAnalyze={handleAnalyze}
                 isLoading={isLoading}
                 language={language}
@@ -315,17 +416,56 @@ export const App: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                {/* Right controls: Informative Yellow Alert + Drawer Trigger + Quick Demo */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Informative Interactive Yellow Alert */}
                   {abnormalCount > 0 ? (
-                    <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-2 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setDemystifyTab('biomarkers')}
+                      className="group px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 flex items-center gap-2 shadow-sm transition cursor-pointer"
+                      title={
+                        language === 'hi'
+                          ? `आपकी रिपोर्ट में ${abnormalCount} बायोमार्कर्स सामान्य सीमा से बाहर हैं। विस्तृत तालिका देखने के लिए क्लिक करें।`
+                          : `${abnormalCount} biomarkers are outside healthy medical reference range. Click to inspect biomarker table.`
+                      }
+                    >
                       <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-                      <span>{abnormalCount} Alerts Outside Range</span>
-                    </span>
+                      <span>
+                        {language === 'hi'
+                          ? `⚠️ ${abnormalCount} बायोमार्कर्स सामान्य सीमा से बाहर`
+                          : `⚠️ ${abnormalCount} Alerts Outside Range`}
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 text-amber-400 group-hover:translate-x-0.5 transition hidden sm:inline" />
+                    </button>
                   ) : (
-                    <span className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                      All Markers Optimal
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>All Markers Optimal</span>
                     </span>
                   )}
+
+                  {/* Side Drawer Trigger Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsUploadDrawerOpen(true)}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-md shadow-teal-500/20 cursor-pointer transition"
+                    title="Open side drawer to upload PDF/TXT or paste text"
+                  >
+                    <UploadCloud className="h-4 w-4 text-slate-950" />
+                    <span>{language === 'hi' ? 'रिपोर्ट अपलोड / बदलें' : 'Upload / Change Report'}</span>
+                  </button>
+
+                  {/* Quick Demo Case */}
+                  <button
+                    type="button"
+                    onClick={() => handleAnalyze({ text: SAMPLE_PRESETS[0].text })}
+                    className="px-3 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-850 border border-teal-500/30 text-teal-300 hover:text-white font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition hidden md:flex"
+                    title="Instantly run CBC demo sample"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+                    <span>{language === 'hi' ? 'डेमो CBC' : 'Demo CBC'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -402,7 +542,7 @@ export const App: React.FC = () => {
                 </button>
               </div>
 
-              {/* TAB CONTENT 1: Centered Spacious AI Copilot Chat */}
+              {/* TAB CONTENT 1: Centered Spacious AI Copilot Chat (Session Preserved Across Tabs) */}
               {demystifyTab === 'chat' && (
                 <div className="animate-in fade-in duration-200">
                   <CenteredChat
@@ -412,6 +552,10 @@ export const App: React.FC = () => {
                     language={language}
                     hasAnalyzedReport={hasAnalyzedReport}
                     reportId={reportId}
+                    messages={chatMessages}
+                    setMessages={setChatMessages}
+                    suggestions={chatSuggestions}
+                    setSuggestions={setChatSuggestions}
                   />
                 </div>
               )}
@@ -437,13 +581,13 @@ export const App: React.FC = () => {
                 </div>
               )}
 
-              {/* TAB CONTENT 5: Split Overview (Gauges + Realtime Streaming Explanation) */}
+              {/* TAB CONTENT 5: Split Overview (Gauges + Sticky Summary Without Empty Void) */}
               {demystifyTab === 'split' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-200">
                   <div className="lg:col-span-7 space-y-6">
                     <BiomarkerTable biomarkers={biomarkers} language={language} />
                   </div>
-                  <div className="lg:col-span-5 h-full">
+                  <div className="lg:col-span-5 sticky top-20 self-start">
                     <AnalysisStream
                       summary={summary}
                       isStreaming={isLoading}

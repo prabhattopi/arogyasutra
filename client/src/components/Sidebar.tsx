@@ -146,17 +146,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* System Status & Quick Controls Footer */}
-      <div className="p-4 border-t border-slate-800/80 bg-[#050810]/70 space-y-3">
-        {/* Air-Gapped Status Pill */}
-        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/90 border border-teal-500/20 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-[11px] text-slate-300 font-medium">{t('airGappedStatus')}</span>
+      <div className="p-4 border-t border-slate-800/80 space-y-3 bg-[#050810]">
+        {/* Air-Gapped Trademark Green Rectangular Badge */}
+        <div className="rounded-xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-[#071310] border border-emerald-500/40 p-2.5 shadow-md">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <span className="font-extrabold text-[11px] tracking-wider text-emerald-300 uppercase">
+                100% Air-Gapped
+              </span>
+            </div>
+            <Shield className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
           </div>
-          <Shield className="h-3.5 w-3.5 text-emerald-400" />
+          <p className="text-[10px] text-slate-400 font-medium leading-tight">
+            {language === 'hi' ? 'शून्य क्लाउड लीकेज · ऑन-डिवाइस सुरक्षित' : 'Zero Cloud PHI Leakage · On-Device'}
+          </p>
         </div>
 
         {/* Local Model Pill & Trigger */}

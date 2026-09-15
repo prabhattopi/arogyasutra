@@ -50,7 +50,7 @@ export const AnalysisStream: React.FC<AnalysisStreamProps> = ({
   }, [summary, isStreaming]);
 
   return (
-    <div className="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl h-full flex flex-col justify-between">
+    <div className="glass-panel rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col">
       <div>
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4 mb-4">
@@ -123,7 +123,7 @@ export const AnalysisStream: React.FC<AnalysisStreamProps> = ({
         <div
           ref={streamContainerRef}
           onScroll={handleScroll}
-          className="min-h-[220px] max-h-[500px] overflow-y-auto pr-1 text-xs sm:text-sm text-slate-200"
+          className="min-h-[220px] max-h-[calc(100vh-320px)] overflow-y-auto pr-1 text-xs sm:text-sm text-slate-200"
         >
           {summary ? (
             <MarkdownRenderer content={summary} isStreaming={isStreaming} />

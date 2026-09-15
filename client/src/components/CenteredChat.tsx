@@ -1,11 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, User, Send, RefreshCw, AlertCircle, Sparkles, MessageSquare, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Bot,
+  User,
+  Send,
+  RefreshCw,
+  Sparkles,
+  MessageSquare,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+} from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { Biomarker } from '../types/report';
 import { streamChatWithReport } from '../services/api';
 import { LanguageCode } from '../i18n/translations';
 
-interface Message {
+export interface ChatMessage {
   id: string;
   sender: 'user' | 'assistant';
   text: string;
@@ -19,6 +30,10 @@ interface CenteredChatProps {
   language: LanguageCode;
   hasAnalyzedReport: boolean;
   reportId?: string;
+  messages: ChatMessage[];
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  suggestions: string[];
+  setSuggestions: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const CenteredChat: React.FC<CenteredChatProps> = ({
@@ -28,18 +43,20 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
   language,
   hasAnalyzedReport,
   reportId,
+  messages,
+  setMessages,
+  suggestions,
+  setSuggestions,
 }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingAnswer, setStreamingAnswer] = useState('');
-  const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef<boolean>(true);
 
-  // Dynamic grounded suggestions
+  // Dynamic grounded suggestions generator
   const generateInitialSuggestions = () => {
     const list: string[] = [];
     const hasLowHb = biomarkers.some(
@@ -86,29 +103,29 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
     return list.slice(0, 4);
   };
 
-  // Reset or initialize on report switch or language change
+  // Populate welcome message ONLY when empty or reportId changes
   useEffect(() => {
     if (hasAnalyzedReport) {
-      const welcomeText =
-        language === 'hi'
-          ? `नमस्ते! मैंने आपकी **${reportType || 'लैब रिपोर्ट'}** का विश्लेषण पूरा कर लिया है। आप रिपोर्ट के किसी भी बायोमार्कर, आहार, या डॉक्टर परामर्श के बारे में हिंदी, English या Hinglish में सवाल पूछ सकते हैं।`
-          : `Hello! I have reviewed your **${reportType || 'diagnostic report'}** for ${patientName || 'the patient'}. Feel free to ask any questions regarding your biomarkers, dietary recommendations, warning signs, or doctor consultation in English, Hindi, or Hinglish.`;
+      if (messages.length === 0) {
+        const welcomeText =
+          language === 'hi'
+            ? `नमस्ते! मैंने आपकी **${reportType || 'लैब रिपोर्ट'}** का विश्लेषण पूरा कर लिया है। आप रिपोर्ट के किसी भी बायोमार्कर, आहार, या डॉक्टर परामर्श के बारे में हिंदी, English या Hinglish में सवाल पूछ सकते हैं।`
+            : `Hello! I have reviewed your **${reportType || 'diagnostic report'}** for ${patientName || 'the patient'}. Feel free to ask any questions regarding your biomarkers, dietary recommendations, warning signs, or doctor consultation in English, Hindi, or Hinglish.`;
 
-      setMessages([
-        {
-          id: 'welcome-' + Date.now(),
-          sender: 'assistant',
-          text: welcomeText,
-          timestamp: 'Just now',
-        },
-      ]);
-      setCurrentSuggestions(generateInitialSuggestions());
-      setStreamingAnswer('');
-    } else {
-      setMessages([]);
-      setCurrentSuggestions([]);
+        setMessages([
+          {
+            id: 'welcome-' + Date.now(),
+            sender: 'assistant',
+            text: welcomeText,
+            timestamp: 'Just now',
+          },
+        ]);
+      }
+      if (suggestions.length === 0) {
+        setSuggestions(generateInitialSuggestions());
+      }
     }
-  }, [reportId, hasAnalyzedReport, language]);
+  }, [reportId, hasAnalyzedReport]);
 
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
@@ -122,11 +139,28 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
     }
   }, [messages, streamingAnswer]);
 
+  const handleResetChat = () => {
+    const welcomeText =
+      language === 'hi'
+        ? `नमस्ते! चैट रीसेट हो गया है। आप अपनी **${reportType || 'लैब रिपोर्ट'}** के बारे में कोई भी नया सवाल पूछ सकते हैं।`
+        : `Chat refreshed. You can ask any new questions regarding your **${reportType || 'diagnostic report'}**.`;
+
+    setMessages([
+      {
+        id: 'welcome-' + Date.now(),
+        sender: 'assistant',
+        text: welcomeText,
+        timestamp: 'Just now',
+      },
+    ]);
+    setSuggestions(generateInitialSuggestions());
+  };
+
   const handleSend = async (questionToSend?: string) => {
     const q = (questionToSend || input).trim();
     if (!q || isStreaming || !hasAnalyzedReport) return;
 
-    const userMsg: Message = {
+    const userMsg: ChatMessage = {
       id: 'usr-' + Date.now(),
       sender: 'user',
       text: q,
@@ -173,7 +207,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
             qLower.includes('eat') ||
             qLower.includes('aahar')
           ) {
-            setCurrentSuggestions(
+            setSuggestions(
               language === 'hi'
                 ? [
                     'किन खाद्य पदार्थों से परहेज करना चाहिए?',
@@ -192,7 +226,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
             qLower.includes('serious') ||
             qLower.includes('chinta')
           ) {
-            setCurrentSuggestions(
+            setSuggestions(
               language === 'hi'
                 ? [
                     'घर पर किन चेतावनी लक्षणों पर ध्यान देना चाहिए?',
@@ -210,7 +244,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
             qLower.includes('glucose') ||
             qLower.includes('diabetes')
           ) {
-            setCurrentSuggestions(
+            setSuggestions(
               language === 'hi'
                 ? [
                     'भोजन के बाद का शुगर स्तर क्या होना चाहिए?',
@@ -224,7 +258,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
                   ]
             );
           } else {
-            setCurrentSuggestions(
+            setSuggestions(
               language === 'hi'
                 ? [
                     'डॉक्टर से परामर्श के लिए शीर्ष सवाल?',
@@ -259,7 +293,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
   return (
     <div className="max-w-4xl mx-auto w-full rounded-2xl bg-[#080d18] border border-teal-500/30 shadow-2xl overflow-hidden flex flex-col h-[640px] max-h-[82vh] backdrop-blur-2xl">
       {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-slate-800/80 bg-[#0b1322]/90">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-800/80 bg-[#0b1322]/90">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-sm">
             <Bot className="h-5 w-5" />
@@ -267,14 +301,14 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
           <div>
             <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
               <span>ArogyaSutra Copilot</span>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30">
                 Air-Gapped LLM
               </span>
             </h3>
             <p className="text-xs text-slate-400">
               {hasAnalyzedReport ? (
                 <span>
-                  Active Report: <strong className="text-slate-200">{reportType}</strong> · Subject:{' '}
+                  Active Session: <strong className="text-slate-200">{reportType}</strong> · Subject:{' '}
                   <strong className="text-slate-200">{patientName}</strong>
                 </span>
               ) : (
@@ -284,10 +318,24 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
           </div>
         </div>
 
-        {/* Status indicator */}
-        <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>{language === 'hi' ? 'ऑन-डिवाइस सुरक्षित' : 'On-Device Secure'}</span>
+        {/* Right side controls: Reset Chat + Status badge */}
+        <div className="flex items-center gap-2">
+          {hasAnalyzedReport && messages.length > 1 && (
+            <button
+              type="button"
+              onClick={handleResetChat}
+              className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-400 hover:text-white transition flex items-center gap-1.5 cursor-pointer"
+              title="Reset conversation for this report"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>{language === 'hi' ? 'चैट रीसेट' : 'Clear Chat'}</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px]">{language === 'hi' ? 'ऑन-डिवाइस सक्रिय' : 'On-Device Active'}</span>
+          </div>
         </div>
       </div>
 
@@ -307,8 +355,8 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
             </h4>
             <p className="text-xs sm:text-sm text-slate-400 max-w-md leading-relaxed">
               {language === 'hi'
-                ? 'कृपया ऊपर दिए गए टेस्ट नमूनों में से एक चुनें या अपनी PDF/TXT रिपोर्ट अपलोड करें। इसके बाद AI साथी आपके बायोमार्कर्स के आधार पर सवालों का विस्तृत उत्तर देगा।'
-                : 'Select one of the 1-click verified test cases above (CBC, Metabolic Panel, or Lipid Panel) or upload your lab report. The Copilot will answer any biomarker inquiry with 100% on-device privacy.'}
+                ? 'कृपया ऊपर "रिपोर्ट अपलोड / बदलें" बटन पर क्लिक करके अपनी PDF/TXT रिपोर्ट लोड करें। इसके बाद AI साथी आपके बायोमार्कर्स के आधार पर सवालों का उत्तर देगा।'
+                : 'Click "Upload / Change Report" above to load your medical report. The Copilot will then answer any question with 100% on-device privacy.'}
             </p>
           </div>
         ) : (
@@ -364,7 +412,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
       </div>
 
       {/* Grounded Suggestions Stack with Hide/Open Toggle */}
-      {hasAnalyzedReport && currentSuggestions.length > 0 && !isStreaming && (
+      {hasAnalyzedReport && suggestions.length > 0 && !isStreaming && (
         <div className="px-5 py-2.5 bg-[#090f1d]/95 border-t border-slate-800 transition-all">
           <div className="flex items-center justify-between">
             <button
@@ -380,7 +428,7 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
                   : 'Suggested Questions'}
               </span>
               <span className="text-[10px] font-normal px-1.5 py-0.2 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/25">
-                {currentSuggestions.length}
+                {suggestions.length}
               </span>
             </button>
 
@@ -407,12 +455,12 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
           {/* Collapsible Suggestions Body */}
           {isSuggestionsOpen && (
             <div className="flex flex-col gap-1.5 mt-2.5 max-h-48 overflow-y-auto pr-1 animate-in fade-in duration-150">
-              {currentSuggestions.map((s, i) => (
+              {suggestions.map((s, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => handleSend(s)}
-                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 text-slate-200 hover:text-teal-200 transition flex items-center justify-between group cursor-pointer shadow-sm"
+                  className="w-full text-left px-3.5 py-2 rounded-xl text-xs bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 hover:border-teal-500/50 text-slate-200 hover:text-teal-200 transition flex items-center justify-between group cursor-pointer shadow-sm"
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-teal-400 flex-shrink-0" />
@@ -443,8 +491,8 @@ export const CenteredChat: React.FC<CenteredChatProps> = ({
             placeholder={
               !hasAnalyzedReport
                 ? language === 'hi'
-                  ? 'कृपया पहले ऊपर रिपोर्ट का विश्लेषण करें...'
-                  : 'Demystify a report above first to start conversation...'
+                  ? 'कृपया पहले रिपोर्ट अपलोड करें...'
+                  : 'Load a report first to start conversation...'
                 : language === 'hi'
                 ? 'हिंदी, English या Hinglish में अपने सवाल पूछें...'
                 : 'Ask questions about your biomarkers in English/Hindi/Hinglish...'
