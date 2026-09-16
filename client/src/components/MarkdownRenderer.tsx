@@ -34,35 +34,42 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isS
    * Checks if a line represents a major section title
    */
   const isSectionHeader = (trimmed: string) => {
+    // 1. A bullet item starting with -, *, or • is NEVER a section header
+    if (/^[-*•]\s+/.test(trimmed)) {
+      return { isHeader: false, isOverview: false, isFindings: false, isNextSteps: false };
+    }
+
+    const hasHeadingPrefix = /^#{1,6}\s+/.test(trimmed);
+    const hasNumberedHeaderPrefix = /^[123]\.\s+/.test(trimmed);
+
+    // If it neither has # nor 1./2./3. at line start, it is not a major section title
+    if (!hasHeadingPrefix && !hasNumberedHeaderPrefix) {
+      return { isHeader: false, isOverview: false, isFindings: false, isNextSteps: false };
+    }
+
     const rawClean = stripMarkdownSymbols(trimmed).toLowerCase();
 
-    // Check for common section keywords
+    // Determine specific section type
     const isOverview =
       rawClean.includes('overview') ||
-      rawClean.includes('summary') ||
+      rawClean.includes('reassurance') ||
       rawClean.includes('सारांश') ||
-      rawClean.includes('आश्वस्ति');
+      rawClean.includes('आश्वस्ति') ||
+      /^(?:#+\s*)?1\./.test(rawClean);
+
     const isFindings =
-      rawClean.includes('key finding') ||
-      rawClean.includes('findings explained') ||
-      rawClean.includes('महत्वपूर्ण निष्कर्ष') ||
-      rawClean.includes('निष्कर्ष');
+      rawClean.includes('finding') ||
+      rawClean.includes('निष्कर्ष') ||
+      /^(?:#+\s*)?2\./.test(rawClean);
+
     const isNextSteps =
       rawClean.includes('next step') ||
       rawClean.includes('doctor visit') ||
       rawClean.includes('physician') ||
-      rawClean.includes('डॉक्टर') ||
-      rawClean.includes('परामर्श');
+      rawClean.includes('परामर्श') ||
+      /^(?:#+\s*)?3\./.test(rawClean);
 
-    // Matches lines like "### 1. Overview", "* **Summary**", "1. **Summary**", "**Key Findings**"
-    const isNumberedOrHashed = /^(?:#+|\d+\.|\*|\-|\u2022)?\s*\*?\*?\s*(?:overview|summary|key findings|next steps|doctor visit|1\.|2\.|3\.|सारांश|निष्कर्ष)/i.test(
-      trimmed
-    );
-
-    if (isOverview || isFindings || isNextSteps || isNumberedOrHashed) {
-      return { isHeader: true, isOverview, isFindings, isNextSteps };
-    }
-    return { isHeader: false, isOverview: false, isFindings: false, isNextSteps: false };
+    return { isHeader: true, isOverview, isFindings, isNextSteps };
   };
 
   const renderFormattedLine = (line: string, lineIndex: number) => {
@@ -134,7 +141,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isS
         const upper = inner.toUpperCase();
         const isLow = upper.includes('LOW') || upper.includes('कम');
         const isHigh = upper.includes('HIGH') || upper.includes('अधिक');
-        const isNormal = upper.includes('NORMAL') || upper.includes('सामान्य');
+        const isNormal = upper.includes('NORMAL') || upper.includes('सामान्य') || upper.includes('OPTIMAL');
+        const isAlert = upper.includes('ALERT') || upper.includes('तनाव') || upper.includes('चेतावनी');
 
         return (
           <span
@@ -144,6 +152,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isS
                 ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                 : isHigh
                 ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                : isAlert
+                ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                 : isNormal
                 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                 : 'bg-slate-800/90 text-white border border-slate-700 font-medium'
