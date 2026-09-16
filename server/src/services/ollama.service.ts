@@ -209,23 +209,27 @@ I am designed strictly to assist with your medical test results, biomarker expla
       .map((b: any) => `${b.name}: ${b.value} ${b.unit} (${b.status})`)
       .join(', ');
 
-    const systemPrompt = `You are ArogyaSutra, an empathetic, privacy-first medical lab report educator.
-A patient is asking a follow-up question about their diagnostic report.
+    const systemPrompt = `You are ArogyaSutra, an empathetic, privacy-first medical healthcare companion.
+A patient or family member is asking a follow-up question about their diagnostic report.
+THE PATIENT IS AN EVERYDAY PERSON, NOT A MEDICAL DOCTOR OR EXPERT.
 
 PATIENT REPORT CONTEXT:
 Report Type: ${reportContext?.reportType || 'Diagnostic Panel'}
 Patient: ${reportContext?.patientName || 'Anonymous'}
 Flagged Biomarkers Outside Range: ${abnormalSummary || 'All within normal intervals'}
 
-GUIDELINES:
-1. Detect the patient's language style:
-   - If asked in Hindi, reply in clear, gentle Hindi.
+ESSENTIAL GUIDELINES:
+1. Speak in warm, human-friendly, layman terms. Never use cold, frightening medical jargon without immediately explaining it in simple terms.
+2. Use relatable everyday analogies (e.g., hemoglobin = oxygen delivery vehicle, WBC = immune soldiers defending against a temporary infection, kidneys = fine water filters).
+3. Start with gentle reassurance (e.g., "घबराने की कोई बात नहीं है...", "There is no reason to panic...").
+4. Detect the patient's language style:
+   - If asked in Hindi, reply in clear, gentle, comforting Hindi.
    - If asked in Hinglish (e.g., 'Khoon badhane ke liye kya khaye?', 'Kya ye serious hai?'), reply in natural, supportive conversational Hinglish.
-   - If asked in English, reply in plain, compassionate English.
-2. Educate and reassure. Connect your answer directly to their biomarkers if relevant.
-3. NEVER prescribe medicines, specific drugs, or formulate final diagnoses.
-4. Suggest practical questions or points they should discuss with their doctor.
-5. Format cleanly with short paragraphs and bullet points. Do NOT output raw asterisks (***) or hashes (###).`;
+   - If asked in English, reply in plain, accessible, compassionate English.
+5. Provide practical, daily lifestyle & nutrition tips (spinach, beetroot, jaggery, hydration, restful sleep).
+6. Strict Guardrails: NEVER prescribe prescription medications or dosages, and never declare a scary definitive disease diagnosis.
+7. End with calm, specific questions the patient can discuss with their attending doctor.
+8. Format cleanly with clean bullet points and short, readable paragraphs.`;
 
     const userPrompt = `Patient Question: "${question}"
 Please provide a clear, supportive, and knowledgeable explanation.`;
@@ -282,33 +286,44 @@ Please provide a clear, supportive, and knowledgeable explanation.`;
     onChunk: (chunk: string) => void
   ): Promise<string> {
     const qLower = question.toLowerCase();
-    const isHinglish = qLower.includes('kya') || qLower.includes('hai') || qLower.includes('khaye') || qLower.includes('kaise');
+    const isHinglish = qLower.includes('kya') || qLower.includes('hai') || qLower.includes('khaye') || qLower.includes('kaise') || qLower.includes('batao');
     const isHindi = language === 'hi';
 
     let reply = '';
 
     if (isHinglish) {
-      reply = `Aapke sawaal ka jawaab aapki report ke hisaab se:
+      reply = `Ghabrane ki koi baat nahi hai! Aapke sawaal ka aasan bhasha me jawaab:
 
-1. **Biomarker Samajhein:** Aapki report me jo parameters thode out-of-range hain (jaise hemoglobin ya WBC), unhe nutrition aur lifestyle se balance kiya ja sakta hai.
-2. **Khane-Peene Me Dhyan:** Hari sabziyan (palak, methi), daal, chane, beetroot, aur seasonal fruits aapke red blood cells aur immunity ko naturally support karte hain.
-3. **Doctor Se Kya Puchein:** Apne doctor se puchein ki kya koi specific iron supplement ya follow-up test ki zarurat hai.
+1. **Aapke Biomarkers Ka Matlab:** Agar aapki report me hemoglobin kam ya WBC thoda badha hua hai, toh yeh aam taur par poshan ki kami ya kisi aam infection se ladne ka sanket hota hai.
+2. **Khane-Peene Me Aasan Sudhaar:** 
+   - Hari sabziyan (palak, methi) aur daalein khoon badhane me madad karti hain.
+   - Chukandar (beetroot), anar, aur gudd (jaggery) iron ke acche natural srot hain.
+   - Khoob paani piyein aur acchi neend lein taaki sharir jaldi recover ho sake.
+3. **Doctor Se Kya Puchein:** Agli visit par doctor se puchein ki kya kisi iron tonic/supplement ki zarurat hai aur 3-4 hafte baad dubara test kab karana chahiye.
 
-Khud se koi dawa na lein, doctor ki salaah sabse zaroori hai.`;
+*Dhyan rahe: Yeh jankari samajhne ke liye hai. Koi bhi nayi dawa shuru karne se pehle apne doctor se zaroor consult karein.*`;
     } else if (isHindi) {
-      reply = `आपकी रिपोर्ट के आधार पर इस प्रश्न की जानकारी:
+      reply = `घबराने की कोई बात नहीं है! आपकी रिपोर्ट के आधार पर सरल और शांत शब्दों में जानकारी:
 
-1. **बायोमार्कर्स को समझना:** यदि आपका हीमोग्लोबिन कम है या WBC अधिक है, तो इसका अर्थ है कि शरीर को उचित पोषण और आराम की आवश्यकता है।
-2. **आहार एवं पोषण:** हरी पत्तेदार सब्जियां, अनार, चुकंदर, दालें और भरपूर पानी पीने से शरीर की रोग प्रतिरोधक क्षमता बेहतर होती है।
-3. **अगला कदम:** अपने डॉक्टर से इस रिपोर्ट के बारे में चर्चा करें और पूछें कि क्या किसी विशेष सप्लीमेंट या 3-4 हफ़्तों बाद दोबारा टेस्ट की आवश्यकता है।`;
+1. **बायोमार्कर्स को आसान शब्दों में समझें:** यदि आपका हीमोग्लोबिन कम है या श्वेत रक्त कोशिकाएं (WBC) अधिक हैं, तो इसका अर्थ है कि शरीर का प्राकृतिक सुरक्षा तंत्र काम कर रहा है और शरीर को पोषण व आराम की जरूरत है।
+2. **आहार एवं घरेलू पोषण:**
+   - **आयरन युक्त आहार:** पालक, मेथी, दालें, चना, अनार और चुकंदर का सेवन हीमोग्लोबिन सुधारने में मददगार है।
+   - **विटामिन C:** नींबू पानी या संतरे का सेवन भोजन से आयरन सोखने में मदद करता है।
+   - **पर्याप्त पानी व आराम:** प्रतिदिन पर्याप्त पानी पिएं और 7-8 घंटे की शांतिपूर्ण नींद लें।
+3. **डॉक्टर से परामर्श:** अपने डॉक्टर से पूछें कि क्या आपको किसी विशेष आयरन सप्लीमेंट की आवश्यकता है और कितने हफ्तों बाद दोबारा जांच करानी चाहिए।
+
+*महत्वपूर्ण: यह जानकारी केवल आपकी समझ के लिए है। किसी भी दवा की खुराक के लिए हमेशा अपने डॉक्टर की सलाह लें।*`;
     } else {
-      reply = `Based on your diagnostic panel results:
+      reply = `Please do not worry! Here is a simple, plain-language explanation designed for you and your family:
 
-1. **Biomarker Context:** Any values outside standard ranges (such as lower hemoglobin or elevated white blood cells) reflect temporary physiological responses or nutritional factors.
-2. **Nutrition & Lifestyle Support:** Incorporating iron-rich foods (leafy greens, legumes, beets, lean proteins), staying well-hydrated, and prioritizing rest are excellent foundational steps.
-3. **Physician Guidance:** Ask your doctor during your next visit whether a targeted dietary plan or follow-up test in 3 to 4 weeks is appropriate for you.
+1. **Understanding Your Biomarkers:** Temporary shifts in parameters like Hemoglobin or White Blood Cells are very common. Hemoglobin acts like an oxygen delivery vehicle (low levels cause tiredness), while white cells are immune soldiers defending against recent inflammation.
+2. **Everyday Nutrition & Energy Steps:**
+   - **Iron-Rich Foods:** Incorporate spinach, lentils, beets, dates, and jaggery into your meals.
+   - **Vitamin C Support:** Citrus fruits (oranges, lemons) help your body naturally absorb iron.
+   - **Rest & Hydration:** Adequate water intake and restorative sleep are foundational for healthy recovery.
+3. **Partnering With Your Doctor:** Ask your physician if an iron panel or dietary supplement is indicated, and when a routine follow-up re-test in 3 to 4 weeks should be scheduled.
 
-Remember: This information is educational. Always consult your attending physician before modifying medications.`;
+*Note: ArogyaSutra is an educational companion. Always consult your attending healthcare practitioner before starting any medications.*`;
     }
 
     for (const word of reply.split(' ')) {

@@ -49,6 +49,32 @@
     color: #ffffff;
     font-weight: 700;
   }
+
+  /* Specific Devanagari & Hindi Typography Harmony */
+  [lang="hi"],
+  .lang-hi,
+  :lang(hi) {
+    font-family: 'Poppins', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: 0.005em;
+    line-height: 1.85;
+  }
+
+  [lang="hi"] h1,
+  [lang="hi"] h2,
+  [lang="hi"] h3,
+  [lang="hi"] h4,
+  [lang="hi"] h5,
+  [lang="hi"] h6,
+  .lang-hi h1,
+  .lang-hi h2,
+  .lang-hi h3,
+  .lang-hi h4,
+  .lang-hi h5,
+  .lang-hi h6 {
+    font-family: 'Poppins', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: 0;
+    line-height: 1.45;
+  }
 }
 
 /* Modern Dark Cyber-Clinical Glassmorphism Surfaces */

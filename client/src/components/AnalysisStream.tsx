@@ -10,6 +10,7 @@ interface AnalysisStreamProps {
   reportType?: string;
   patientName?: string;
   language: LanguageCode;
+  isFullView?: boolean;
 }
 
 export const AnalysisStream: React.FC<AnalysisStreamProps> = ({
@@ -18,6 +19,7 @@ export const AnalysisStream: React.FC<AnalysisStreamProps> = ({
   reportType,
   patientName,
   language,
+  isFullView = false,
 }) => {
   const [copied, setCopied] = useState(false);
   const streamContainerRef = useRef<HTMLDivElement>(null);
@@ -123,7 +125,11 @@ export const AnalysisStream: React.FC<AnalysisStreamProps> = ({
         <div
           ref={streamContainerRef}
           onScroll={handleScroll}
-          className="min-h-[220px] max-h-[calc(100vh-320px)] overflow-y-auto pr-1 text-xs sm:text-sm text-slate-200"
+          className={`pr-1 text-xs sm:text-sm text-slate-200 ${
+            isFullView
+              ? 'min-h-[260px]'
+              : 'min-h-[220px] max-h-[calc(100vh-280px)] overflow-y-auto'
+          }`}
         >
           {summary ? (
             <MarkdownRenderer content={summary} isStreaming={isStreaming} />

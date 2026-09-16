@@ -189,7 +189,12 @@ export const LandingOverview: React.FC<LandingOverviewProps> = ({
         <div className="flex items-center gap-3">
           <CheckCircle2 className="h-5 w-5 text-teal-400 flex-shrink-0" />
           <div className="text-xs sm:text-sm text-slate-300">
-            <strong className="text-white">Ready for live evaluation?</strong> Choose Complete Blood Count (CBC), Metabolic Panel, or Lipid Panel in 1 click.
+            <strong className="text-white">
+              {language === 'hi' ? 'लाइव परीक्षण के लिए तैयार?' : 'Ready for live evaluation?'}
+            </strong>{' '}
+            {language === 'hi'
+              ? '1-क्लिक में कम्प्लीट ब्लड काउंट (CBC), मेटाबोलिक या लिपिड प्रोफाइल चुनें।'
+              : 'Choose Complete Blood Count (CBC), Metabolic Panel, or Lipid Panel in 1 click.'}
           </div>
         </div>
 

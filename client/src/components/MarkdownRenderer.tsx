@@ -98,8 +98,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isS
       const rawText = trimmed.replace(/^(?:[\-\*•]|\d+\.)\s+/, '');
 
       return (
-        <div key={lineIndex} className="flex items-start gap-2.5 my-2 pl-0.5 text-neutral-200 text-xs sm:text-sm leading-7">
-          <span className="h-1.5 w-1.5 rounded-full bg-neutral-400 mt-2.5 flex-shrink-0" />
+        <div key={lineIndex} className="flex items-start gap-3 my-2.5 pl-0.5 text-slate-200 text-xs sm:text-sm leading-relaxed sm:leading-7">
+          <span className="h-1.5 w-1.5 rounded-full bg-teal-400 mt-2.5 flex-shrink-0" />
           <div className="flex-1">
             {formatSpans(rawText)}
           </div>
@@ -109,7 +109,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isS
 
     // 3. Regular Paragraph
     return (
-      <p key={lineIndex} className="my-2 text-xs sm:text-sm text-neutral-300 leading-7 font-normal">
+      <p key={lineIndex} className="my-2.5 text-xs sm:text-sm text-slate-300 leading-relaxed sm:leading-7 font-normal">
         {formatSpans(trimmed)}
       </p>
     );
@@ -139,14 +139,14 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isS
         return (
           <span
             key={i}
-            className={`font-semibold px-2 py-0.5 rounded-md mx-1 text-xs sm:text-sm inline-block ${
+            className={`font-semibold px-2 py-0.5 rounded-md mr-2 my-0.5 text-xs sm:text-sm inline-block align-baseline ${
               isLow
                 ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                 : isHigh
                 ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                 : isNormal
                 ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                : 'bg-neutral-800 text-white border border-neutral-700 font-medium'
+                : 'bg-slate-800/90 text-white border border-slate-700 font-medium'
             }`}
           >
             {inner}
@@ -156,7 +156,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, isS
 
       // Regular text: clean any stray asterisks
       const cleanRegular = part.replace(/\*/g, '');
-      return <span key={i}>{cleanRegular}</span>;
+      return <span key={i} className="leading-relaxed">{cleanRegular}</span>;
     });
   };
 
