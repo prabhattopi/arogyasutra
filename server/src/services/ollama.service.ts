@@ -61,7 +61,7 @@ export class OllamaService {
         },
         {
           responseType: 'stream',
-          timeout: 10000,
+          timeout: 60000,
         }
       );
 
@@ -247,7 +247,7 @@ Please provide a clear, supportive, and knowledgeable explanation.`;
             top_p: 0.9,
           },
         },
-        { responseType: 'stream', timeout: 12000 }
+        { responseType: 'stream', timeout: 60000 }
       );
 
       let fullAnswer = '';
@@ -277,7 +277,7 @@ Please provide a clear, supportive, and knowledgeable explanation.`;
   }
 
   /**
-   * Conversational fallback for report Q&A
+   * Conversational fallback for report Q&A with topic-aware guidance
    */
   private static async chatFallback(
     question: string,
@@ -286,13 +286,79 @@ Please provide a clear, supportive, and knowledgeable explanation.`;
     onChunk: (chunk: string) => void
   ): Promise<string> {
     const qLower = question.toLowerCase();
-    const isHinglish = qLower.includes('kya') || qLower.includes('hai') || qLower.includes('khaye') || qLower.includes('kaise') || qLower.includes('batao');
+    const isHinglish = qLower.includes('kya') || qLower.includes('hai') || qLower.includes('khaye') || qLower.includes('kaise') || qLower.includes('batao') || qLower.includes('kar sakta');
     const isHindi = language === 'hi';
+
+    const isExercise = /exercise|walk|workout|gym|run|heavy|physical|kasrat|vyayam|sports|running|train/i.test(qLower);
+    const isDiet = /diet|food|eat|nutrition|khana|khaye|fruit|sabzi|vitamin|iron|supplement/i.test(qLower);
+    const isConcern = /serious|danger|worry|scared|cancer|critical|dar|tension|khatra|emergency/i.test(qLower);
 
     let reply = '';
 
-    if (isHinglish) {
-      reply = `Ghabrane ki koi baat nahi hai! Aapke sawaal ka aasan bhasha me jawaab:
+    if (isExercise) {
+      if (isHindi) {
+        reply = `आपकी रिपोर्ट के संदर्भ में व्यायाम (Exercise) से संबंधित महत्वपूर्ण एवं सुरक्षित सलाह:
+
+1. **शरीर के संकेतों को समझें:** जब हीमोग्लोबिन सामान्य से कम होता है, तो मांसपेशियों तक ऑक्सीजन थोड़ी कम गति से पहुँचती है। ऐसे में सामान्य से अधिक जल्दी थकान या सांस फूलना स्वाभाविक है।
+2. **हल्की गतिविधियां पूरी तरह सुरक्षित:** 15-20 मिनट की धीमी गति से वॉक (टहलना) या हल्के स्ट्रेचिंग योगासन बहुत फायदेमंद हैं।
+3. **भारी कसरत से बचें:** जब तक खून की जांच में हीमोग्लोबिन सुधर न जाए, तब तक तेज दौड़ने, भारी वजन उठाने (Gym) या तीव्र एरोबिक्स से बचें।
+4. **चक्कर आने पर तुरंत आराम करें:** यदि व्यायाम के दौरान कमजोरी, चक्कर या दिल की धड़कन तेज महसूस हो, तो तुरंत रुकें और पानी पिएं।
+5. **डॉक्टर से परामर्श:** अपनी अगली विजिट में डॉक्टर से अपनी दिनचर्या के अनुसार सुरक्षित व्यायाम की समय-सीमा अवश्य तय करें।`;
+      } else if (isHinglish) {
+        reply = `Aapke report ke hisaab se exercise aur physical workout ke baare me zaroori salah:
+
+1. **Sharir Ki Suniye:** Jab hemoglobin kam hota hai, toh muscles tak oxygen delivery thodi slow ho jaati hai, jisse jaldi thakan ya saans phoolna normal hai.
+2. **Halka Walk Safe Hai:** 15-20 minute ki aaramdayak walk ya halki stretching safe aur acchi hai. Heavy weightlifting ya exhausting workout tab tak na karein jab tak red blood cells recover na ho jayein.
+3. **Dizziness Aane Par Rest:** Agar chalte waqt thoda bhi chakkar ya kamzori lage toh turant baith kar paani piyein.
+4. **Doctor Se Baat Karein:** Apne physician se puchein ki aapke recovery timeline ke according kitna exercise best rahega.`;
+      } else {
+        reply = `Here is safe, plain-language guidance regarding exercise based on your diagnostic report:
+
+1. **Listen to Your Body:** When Hemoglobin is below optimal ranges, less oxygen is transported to working muscles. It is completely natural to feel fatigued or out of breath faster than usual.
+2. **Stick to Gentle, Low-Impact Activity:** Leisurely 15 to 20-minute walks, gentle stretching, or light yoga are restorative and safe. Avoid intense workouts, heavy weightlifting, or high-intensity interval training until your cell counts recover.
+3. **Stop Immediately If Dizzy:** If you experience any lightheadedness, palpitations, or sudden weakness, stop immediately, sit down, and hydrate.
+4. **Partner With Your Doctor:** Ask your attending physician what exercise intensity and heart rate goals are safest during your recovery period.`;
+      }
+    } else if (isDiet) {
+      if (isHindi) {
+        reply = `आपकी रिपोर्ट के अनुसार प्राकृतिक पोषण एवं आहार सुधार:
+
+1. **आयरन और खून बढ़ाने वाले आहार:** पालक, मेथी, चने, दालें, चुकंदर (Beetroot), अनार और गुड़ को भोजन में शामिल करें।
+2. **विटामिन C का साथ:** भोजन के साथ नींबू पानी, संतरा या आंवला लेने से शरीर आयरन को बेहतर तरीके से सोख पाता है।
+3. **चाय-कॉफी में अंतर रखें:** खाने के तुरंत बाद चाय या कॉफी न पिएं, क्योंकि यह आयरन के अवशोषण में रुकावट डालती है।
+4. **पर्याप्त पानी व आराम:** प्रतिदिन 8-10 गिलास पानी और 7-8 घंटे की गहरी नींद शरीर को तेजी से ठीक करती है।`;
+      } else if (isHinglish) {
+        reply = `Aapki report ke hisaab se aasan aur natural diet tips:
+
+1. **Khoon Badhane Wale Foods:** Palak, daalein, chana, anar, chukandar (beetroot), aur gudd (jaggery) iron ke natural srot hain.
+2. **Vitamin C Ka Fayda:** Nimbu paani ya amla khane se sharir iron ko jaldi absorb karta hai.
+3. **Chai-Coffee Me Gap:** Khane ke turant baad chai ya coffee na piyein kyunki yeh iron absorb hone se rokti hai.
+4. **Hydration Aur Sleep:** Khoob paani piyein aur 7-8 ghante ki acchi neend lein.`;
+      } else {
+        reply = `Here are evidence-grounded dietary steps to naturally support your blood parameters:
+
+1. **Iron-Dense Whole Foods:** Incorporate spinach, lentils, chickpeas, beetroot, pomegranate, and jaggery into your daily meals.
+2. **Pair With Vitamin C:** Consuming citrus fruits (oranges, lemon water) alongside iron-rich meals boosts natural intestinal absorption.
+3. **Separate Tea & Coffee:** Avoid drinking caffeine directly after meals, as tannins can inhibit iron uptake.
+4. **Hydration & Rest:** Maintain 2-3 liters of daily fluid intake and ensure 7-8 hours of restorative sleep.`;
+      }
+    } else if (isConcern) {
+      if (isHindi) {
+        reply = `कृपया बिल्कुल न घबराएं! 
+
+1. **बायोमार्कर्स केवल संकेतक हैं:** एक लैब रिपोर्ट कभी भी अंतिम बीमारी नहीं होती। हीमोग्लोबिन में कमी या WBC में थोड़ी बढ़ोतरी सामान्यतः खान-पान की कमी या शरीर के हालिया संक्रमण से लड़ने के कारण होती है।
+2. **शरीर का प्राकृतिक रक्षा तंत्र:** श्वेत रक्त कोशिकाएं (WBC) शरीर के सुरक्षा सैनिक हैं। इनका बढ़ना बताता है कि आपका इम्यून सिस्टम सक्रिय रूप से काम कर रहा है।
+3. **डॉक्टर से बातचीत:** शांत मन से अपने डॉक्टर से रिपोर्ट साझा करें। वे साधारण आहार बदलाव या हल्की सप्लीमेंट्स से इसे आसानी से सामान्य कर देंगे।`;
+      } else {
+        reply = `Please do not worry! Here is reassuring perspective on your results:
+
+1. **Lab Markers are Guides, Not Final Verdicts:** Out-of-range parameters are very common. Lower hemoglobin often points to simple nutritional gaps, while elevated WBC reflects your immune soldiers naturally clearing an everyday inflammation.
+2. **Safe & Reversible:** With standard dietary adjustments and appropriate physician follow-up, these numbers routinely stabilize.
+3. **Next Step:** Keep perspective, write down how you feel day-to-day, and review these findings calmly with your attending doctor.`;
+      }
+    } else {
+      if (isHinglish) {
+        reply = `Ghabrane ki koi baat nahi hai! Aapke sawaal ka aasan bhasha me jawaab:
 
 1. **Aapke Biomarkers Ka Matlab:** Agar aapki report me hemoglobin kam ya WBC thoda badha hua hai, toh yeh aam taur par poshan ki kami ya kisi aam infection se ladne ka sanket hota hai.
 2. **Khane-Peene Me Aasan Sudhaar:** 
@@ -302,8 +368,8 @@ Please provide a clear, supportive, and knowledgeable explanation.`;
 3. **Doctor Se Kya Puchein:** Agli visit par doctor se puchein ki kya kisi iron tonic/supplement ki zarurat hai aur 3-4 hafte baad dubara test kab karana chahiye.
 
 *Dhyan rahe: Yeh jankari samajhne ke liye hai. Koi bhi nayi dawa shuru karne se pehle apne doctor se zaroor consult karein.*`;
-    } else if (isHindi) {
-      reply = `घबराने की कोई बात नहीं है! आपकी रिपोर्ट के आधार पर सरल और शांत शब्दों में जानकारी:
+      } else if (isHindi) {
+        reply = `घबराने की कोई बात नहीं है! आपकी रिपोर्ट के आधार पर सरल और शांत शब्दों में जानकारी:
 
 1. **बायोमार्कर्स को आसान शब्दों में समझें:** यदि आपका हीमोग्लोबिन कम है या श्वेत रक्त कोशिकाएं (WBC) अधिक हैं, तो इसका अर्थ है कि शरीर का प्राकृतिक सुरक्षा तंत्र काम कर रहा है और शरीर को पोषण व आराम की जरूरत है।
 2. **आहार एवं घरेलू पोषण:**
@@ -313,8 +379,8 @@ Please provide a clear, supportive, and knowledgeable explanation.`;
 3. **डॉक्टर से परामर्श:** अपने डॉक्टर से पूछें कि क्या आपको किसी विशेष आयरन सप्लीमेंट की आवश्यकता है और कितने हफ्तों बाद दोबारा जांच करानी चाहिए।
 
 *महत्वपूर्ण: यह जानकारी केवल आपकी समझ के लिए है। किसी भी दवा की खुराक के लिए हमेशा अपने डॉक्टर की सलाह लें।*`;
-    } else {
-      reply = `Please do not worry! Here is a simple, plain-language explanation designed for you and your family:
+      } else {
+        reply = `Please do not worry! Here is a simple, plain-language explanation designed for you and your family:
 
 1. **Understanding Your Biomarkers:** Temporary shifts in parameters like Hemoglobin or White Blood Cells are very common. Hemoglobin acts like an oxygen delivery vehicle (low levels cause tiredness), while white cells are immune soldiers defending against recent inflammation.
 2. **Everyday Nutrition & Energy Steps:**
@@ -324,6 +390,7 @@ Please provide a clear, supportive, and knowledgeable explanation.`;
 3. **Partnering With Your Doctor:** Ask your physician if an iron panel or dietary supplement is indicated, and when a routine follow-up re-test in 3 to 4 weeks should be scheduled.
 
 *Note: ArogyaSutra is an educational companion. Always consult your attending healthcare practitioner before starting any medications.*`;
+      }
     }
 
     for (const word of reply.split(' ')) {
