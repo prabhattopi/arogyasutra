@@ -152,49 +152,85 @@ Test immediately with 1 click from the dashboard or drawer:
 
 ---
 
-## 🚀 Running Locally (Fastest Development Mode)
+## 📋 System Prerequisites & Quick Download Links
 
-Run the fullstack app directly on your local system without waiting for container rebuilds:
+ArogyaSutra supports two seamless execution workflows: **Direct Local Development** (instant hot-reload) and **100% Air-Gapped Docker Containerization** (single-command production stack).
 
-### Prerequisites
-- Node.js 20+ and npm
-- Local [Ollama](https://ollama.ai/) installed and running: `ollama run llama3.2:1b`
+### Required Software by Operating System
 
-### 1. Start Backend API
+| Software | Windows | macOS | Linux (Ubuntu/Debian) | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **Node.js (v20+ LTS)** | [Download Windows (.msi)](https://nodejs.org/) <br>or `winget install OpenJS.NodeJS.LTS` | [Download macOS (.pkg)](https://nodejs.org/) <br>or `brew install node` | `sudo apt update && sudo apt install nodejs npm` <br>or [NodeSource LTS](https://github.com/nodesource/distributions) | Runs Vite client & Express backend |
+| **Ollama** | [Download for Windows](https://ollama.com/download/windows) | [Download for macOS](https://ollama.com/download/mac) | `curl -fsSL https://ollama.com/install.sh \| sh` <br>or [Linux Guide](https://ollama.com/download/linux) | Local on-device LLM inference (`llama3.2:1b`) |
+| **Docker Desktop** *(for Docker Mode)* | [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/) | [Docker Desktop for Mac](https://docs.docker.com/desktop/setup/install/mac-install/) | [Docker Engine for Linux](https://docs.docker.com/engine/install/) | Automated air-gapped container stack |
+| **Git** | [Git for Windows](https://git-scm.com/download/win) | `brew install git` <br>or [Git macOS](https://git-scm.com/download/mac) | `sudo apt install git` <br>or [Git Linux](https://git-scm.com/download/linux) | Repository cloning & version control |
+| **MongoDB Compass** *(Optional GUI)* | [Compass for Windows](https://www.mongodb.com/try/download/compass) | [Compass for Mac](https://www.mongodb.com/try/download/compass) | [Compass for Linux](https://www.mongodb.com/try/download/compass) | Inspect local documents with an Atlas-like UI |
+
+> [!NOTE]
+> **Zero-Dependency In-Memory Fallback:** If local MongoDB is not running during direct development, ArogyaSutra's smart database orchestrator seamlessly switches to **High-Speed In-Memory Mode** without crashing or throwing errors. As soon as MongoDB is started, it auto-reconnects in the background!
+
+---
+
+## 🚀 Running Mode 1: Direct Local Development (Fastest)
+
+Ideal for live evaluation, rapid UI iteration, and testing without waiting for container build times:
+
+### Step 1: Pull the Local Quantized Model
+Open your terminal and run:
+```bash
+ollama run llama3.2:1b
+```
+*(Once loaded, you can exit the chat prompt with `/bye`; Ollama will remain active in the background on port `11434`)*
+
+### Step 2: Start Backend Server
+In a new terminal window:
 ```bash
 cd server
 npm install
 npm run dev
 ```
-*(Server starts on `http://localhost:5000` with hot-reload)*
+- API Orchestrator listens at: **`http://localhost:5000`**
+- Healthcheck endpoint: **`http://localhost:5000/api/health`**
 
-### 2. Start Frontend Client
+### Step 3: Start Frontend Client
+In another terminal window:
 ```bash
 cd client
 npm install
 npm run dev
 ```
-*(Client starts on `http://localhost:5173` with instant Vite HMR)*
+- Vite Client listens at: **`http://localhost:5173`**
 
-### 3. Open in Browser
-Navigate to [http://localhost:5173](http://localhost:5173) to evaluate ArogyaSutra.
+### Step 4: Open in Browser
+Open **`http://localhost:5173`** in Chrome, Edge, or Brave.
 
 ---
 
-## 🐳 Docker Deployment (100% Containerized)
+## 🐳 Running Mode 2: 100% Air-Gapped Docker Mode (One-Click)
 
-Our automated runner script handles Docker container creation, local MongoDB setup, model auto-resolution, and launching everything:
+Run the entire multi-container production stack (Ollama, MongoDB 7.0, Express API, and React 19 Nginx frontend) with our automated runner script:
 
 ```bash
-# Open Git Bash in arogyasutra/
+# In project root:
 bash ./run.sh
 ```
 
-**How the automated script operates:**
-1. **Scoped Safe Cleanup:** Safely resets project containers without touching existing database containers.
-2. **Local MongoDB & Ollama:** Spins up `arogyasutra-mongodb` (Mongo 7.0) and `arogyasutra-ollama`.
-3. **Auto-Detects Models:** Uses existing local models or pulls quantized `llama3.2:1b`.
-4. **Launches App:** Hosts backend at `localhost:5000` and frontend at `localhost:5173`.
+### What `run.sh` Automates:
+1. **Docker Engine Healthcheck:** Confirms Docker engine is active.
+2. **Safe Project Isolation:** Gracefully resets existing project containers without touching external databases.
+3. **Spins up Containers:** Builds and starts `arogyasutra-mongodb`, `arogyasutra-ollama`, `arogyasutra-backend`, and `arogyasutra-frontend`.
+4. **Auto-Resolves LLM Weights:** Automatically pulls quantized `llama3.2:1b` into the local container volume.
+5. **Ready Notification:** Displays direct links to the live frontend (`localhost:5173`) and API (`localhost:5000`).
+
+To inspect database documents in Docker using `mongosh`:
+```bash
+docker exec -it arogyasutra-mongodb mongosh arogyasutra --eval "db.reports.find().pretty()"
+```
+
+To connect with MongoDB Compass GUI, use connection string:
+```text
+mongodb://localhost:27017
+```
 
 ---
 
