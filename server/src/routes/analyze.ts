@@ -5,7 +5,7 @@ import { ExtractorService } from '../services/extractor.service';
 import { GuardrailsService } from '../services/guardrails.service';
 import { OllamaService } from '../services/ollama.service';
 import { ReportModel, inMemoryReports, IReport } from '../models/Report';
-import { isConnectedToDb } from '../db/connection';
+import { isConnectedToDb, ensureDatabaseConnection } from '../db/connection';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -86,9 +86,11 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
       };
 
       let savedReport: any;
-      if (isConnectedToDb) {
+      const dbReady = await ensureDatabaseConnection();
+      if (dbReady) {
         try {
           savedReport = await ReportModel.create(reportData);
+          console.log(`✔ [MongoDB] Streamed Report persisted with ID: ${savedReport._id}`);
         } catch (dbErr) {
           console.warn('Failed to persist to Mongo, keeping in memory', dbErr);
           savedReport = { ...reportData, _id: 'mem-' + Date.now() };
@@ -127,9 +129,11 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
     };
 
     let savedReport: any;
-    if (isConnectedToDb) {
+    const dbReadySync = await ensureDatabaseConnection();
+    if (dbReadySync) {
       try {
         savedReport = await ReportModel.create(reportData);
+        console.log(`✔ [MongoDB] Report persisted with ID: ${savedReport._id}`);
       } catch (dbErr) {
         savedReport = { ...reportData, _id: 'mem-' + Date.now() };
         inMemoryReports.unshift(savedReport);

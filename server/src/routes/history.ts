@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { ReportModel, inMemoryReports } from '../models/Report';
-import { isConnectedToDb } from '../db/connection';
+import { isConnectedToDb, ensureDatabaseConnection } from '../db/connection';
 
 const router = Router();
 
@@ -44,7 +44,8 @@ const SEED_TRENDS = [
 router.get('/history', async (_req: Request, res: Response) => {
   try {
     let reports: any[] = [];
-    if (isConnectedToDb) {
+    const dbReady = await ensureDatabaseConnection();
+    if (dbReady) {
       reports = await ReportModel.find().sort({ createdAt: -1 }).limit(20);
     } else {
       reports = [...inMemoryReports];

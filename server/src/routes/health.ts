@@ -1,12 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { OllamaService } from '../services/ollama.service';
-import { isConnectedToDb } from '../db/connection';
+import { isConnectedToDb, isDbConnected } from '../db/connection';
 import { ENV } from '../config/env';
 
 const router = Router();
 
 router.get('/', async (_req: Request, res: Response) => {
   const ollamaStatus = await OllamaService.checkHealth();
+  const dbUp = isDbConnected() || isConnectedToDb;
 
   res.json({
     status: 'online',
@@ -14,8 +15,8 @@ router.get('/', async (_req: Request, res: Response) => {
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     database: {
-      connected: isConnectedToDb,
-      mode: isConnectedToDb ? 'Local Docker MongoDB (100% Air-Gapped)' : 'In-Memory Local Mode (Ready)',
+      connected: dbUp,
+      mode: dbUp ? 'Local Docker MongoDB (100% Air-Gapped)' : 'In-Memory Local Mode (Ready)',
     },
     ollama: {
       online: ollamaStatus.online,
